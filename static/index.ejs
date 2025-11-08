@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hai</title>
+
+    <style>
+    @media print {
+      body {
+        margin: 0;
+      }
+
+      .no-print {
+        display: none;
+      }
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+      width: 3cm;
+      height: 4cm;
+      object-fit: cover;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, 3cm);
+    }
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    </style>
+  </head>
+
+  <body>
+    <h1 class="no-print">Hai</h1>
+
+    <ul class="grid">
+    <% files.forEach((f) => { %>
+      <li>
+        <img src="<%= f %>" alt="<>"/> 
+      </li>
+    <% }) %>
+    </ul>
+  </body>
+</html>
