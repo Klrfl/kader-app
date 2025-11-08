@@ -9,21 +9,37 @@ const server = createServer((req, res) => {
   console.log(req.method, req.url);
 
   if (req.url.endsWith("/")) {
-    const pathToIndex = "./static/index.html";
-
-    // https://dev.to/webduvet/static-content-server-with-nodejs-without-frameworks-d61
-    fs.readFile(pathToIndex, (err, data) => {
-      if (err) console.error(err);
-
-      return res.end(data);
-    });
+    return indexHandler(req, res);
   }
 
   if (req.url == "/files") {
-    res.writeHead(200, { "content-type": "application/json" });
-    return res.end(JSON.stringify({ filtered_files: filteredFiles }));
+    return fileHandler(req, res);
   }
 });
+
+/**
+ * @param req typeof IncomingMessage
+ * @param res typeof ServerResponse
+ */
+const indexHandler = (req, res) => {
+  const pathToIndex = "./static/index.html";
+
+  // https://dev.to/webduvet/static-content-server-with-nodejs-without-frameworks-d61
+  fs.readFile(pathToIndex, (err, data) => {
+    if (err) console.error(err);
+
+    return res.end(data);
+  });
+};
+
+/**
+ * @param req typeof IncomingMessage
+ * @param res typeof ServerResponse
+ */
+const fileHandler = (req, res) => {
+  res.writeHead(200, { "content-type": "application/json" });
+  return res.end(JSON.stringify({ filtered_files: filteredFiles }));
+};
 
 const PORT = "3000";
 server.listen(PORT, () => console.log(`listening on ${PORT}`));
