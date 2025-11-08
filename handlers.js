@@ -57,7 +57,7 @@ const mimeTypeTable = {
 export const sendFile = (req, res) => {
   const url = new URL(req.url, "http://localhost:3000");
 
-  const [_, ext] = url.pathname.match(/.*(.jpe?g|png)$/);
+  const [_, ext] = url.pathname.match(/.*.(jpe?g|png)$/);
   const mimeType = mimeTypeTable[ext];
 
   res.writeHead(200, { "content-type": mimeType });
