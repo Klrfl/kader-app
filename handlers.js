@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import ejs from "ejs";
 
 /**
  * @param req typeof IncomingMessage
@@ -6,9 +7,10 @@ import fs from "node:fs";
  */
 export const indexHandler = (_, res) => {
   const pathToIndex = "./static/index.html";
+  res.writeHead(200, { "content-type": "application/html" });
 
   // https://dev.to/webduvet/static-content-server-with-nodejs-without-frameworks-d61
-  fs.readFile(pathToIndex, (err, data) => {
+  ejs.renderFile(pathToIndex, { filteredFiles }, (err, data) => {
     if (err) console.error(err);
 
     return res.end(data);
