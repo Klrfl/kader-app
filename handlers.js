@@ -1,4 +1,4 @@
-import fs from "node:fs";
+import fs from "node:fs/promises";
 import ejs from "ejs";
 import path from "node:path";
 
@@ -23,19 +23,8 @@ export const indexHandler = (_, res) => {
   });
 };
 
-/**
- * @param req typeof IncomingMessage
- * @param res typeof ServerResponse
- */
-export const fileHandler = (_, res) => {
-  const files = getFiles();
-
-  res.writeHead(200, { "content-type": "application/json" });
-  return res.end(JSON.stringify({ filtered_files: files }));
-};
-
 const getFiles = () => {
-  const path = "../";
+  const path = "../compressed/";
 
   const files = fs.readdirSync(path);
   const filteredFiles = files.filter((f) => f.match(/.*\.jpe?g$/));
@@ -59,9 +48,10 @@ export const sendFile = (req, res) => {
 
   const [_, ext] = url.pathname.match(/.*.(jpe?g|png)$/);
   const mimeType = mimeTypeTable[ext];
+  const filePath = "../compressed";
 
   res.writeHead(200, { "content-type": mimeType });
-  const contents = fs.readFileSync(path.join("../", url.pathname));
+  fs.readFile(path.join(filePath, url.pathname), () => res.end(contents));
 
-  return res.end(contents);
+  return res.end("There was an error");
 };

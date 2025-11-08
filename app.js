@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { indexHandler, fileHandler, sendFile } from "./handlers.js";
+import { indexHandler } from "./handlers.js";
 
 const server = createServer((req, res) => {
   console.log(req.method, req.url);
@@ -8,11 +8,7 @@ const server = createServer((req, res) => {
     return indexHandler(req, res);
   }
 
-  if (req.url == "/files") {
-    return fileHandler(req, res);
-  } else {
-    sendFile(req, res);
-  }
+  sendFile(req, res);
 });
 
 const PORT = "3000";
