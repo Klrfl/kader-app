@@ -1,1 +1,11 @@
+---
+import { db } from "@/database";
+
+const students = await db.selectFrom("students").selectAll().execute();
+---
+
 <h1>Students</h1>
+
+<ul>
+  {students?.map((s) => <li>{s.name}</li>)}
+</ul>
