@@ -10,15 +10,21 @@ first copy the .env.example file, name it .env. Set the respective variables:
 - FILE_PATH: path to your kader images.
 
 ```sh
-#if you're on UNIX like systems
+# if you're on UNIX like systems
 cp .env.example .env
 ```
 
-and then
+and then install dependencies with pnpm
+
+```sh
+corepack enable # or whatever installation method you prefer
+pnpm i
+```
+
 to run the app, use node
 
 ```sh
-node app.js
+node --env-file=.env app.js
 ```
 
 then open localhost:3000 or whatever port you set.
