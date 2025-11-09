@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { indexHandler } from "./handlers.js";
+import { indexHandler, sendFile } from "./handlers.js";
 
 const server = createServer((req, res) => {
   console.log(req.method, req.url);
@@ -12,4 +12,6 @@ const server = createServer((req, res) => {
 });
 
 const PORT = "3000";
-server.listen(PORT, () => console.log(`listening on ${PORT}`));
+server.listen(PORT, () =>
+  console.log(`listening on http://localhost:${PORT} (ctrl+click to open)`),
+);
