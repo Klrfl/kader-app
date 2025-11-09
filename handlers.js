@@ -18,7 +18,7 @@ export const indexHandler = async (req, res) => {
     req.url,
     process.env.HOST ?? "http://localhost:3000/",
   ).searchParams;
-  const groupToFilterBy = searchParams.get("group");
+  const groupToFilterBy = searchParams.get("group") ?? "";
 
   try {
     const indexPath = "./static/index.ejs";
