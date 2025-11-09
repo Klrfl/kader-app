@@ -1,16 +1,20 @@
 ---
-import "../styles/global.css"
+import BaseLayout from "@/layouts/BaseLayout.astro";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout title="Kader App | Home">
+  <main
+    class="flex flex-col gap-4 justify-center items-center min-h-screen min-w-full"
+  >
+    <h1>Kader App</h1>
+    <p>TODO: write description</p>
+
+    <ul class="flex flex-col gap-4">
+      <li><a class="w-full btn btn-primary" href="/print">Print photos</a></li>
+      <li>
+        <a class="w-full btn btn-primary" href="/students/">View students</a>
+      </li>
+      <li><a class="w-full btn btn-primary" href="/groups/">View groups</a></li>
+    </ul>
+  </main>
+</BaseLayout>

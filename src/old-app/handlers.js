@@ -1,17 +1,5 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { AppError } from "./errors.js";
-
-/**
- * @param req typeof IncomingMessage
- * @param res typeof ServerResponse
- */
-export const indexHandler = async (req, res) => {
-  res.writeHead(200, {
-    "content-type": "text/html",
-    date: Date.now().toString(),
-  });
-};
 
 /**
  * get path to your image files
