@@ -1,8 +1,6 @@
 import fs from "node:fs/promises";
-import ejs from "ejs";
 import path from "node:path";
 import { AppError } from "./errors.js";
-import { getGroups, getPicturesPath } from "./utils.js";
 
 /**
  * @param req typeof IncomingMessage
@@ -13,46 +11,6 @@ export const indexHandler = async (req, res) => {
     "content-type": "text/html",
     date: Date.now().toString(),
   });
-
-  const searchParams = new URL(
-    req.url,
-    process.env.HOST ?? "http://localhost:3000/",
-  ).searchParams;
-  const groupToFilterBy = searchParams.get("group") ?? "";
-
-  try {
-    const indexPath = "./static/index.ejs";
-    const picturesPath = getPicturesPath();
-
-    const files = await getFiles(picturesPath, groupToFilterBy);
-    const groups = getGroups();
-
-    const data = {
-      files,
-      groups,
-    };
-
-    // https://dev.to/webduvet/static-content-server-with-nodejs-without-frameworks-d61
-    ejs.renderFile(indexPath, data, (err, data) => {
-      if (err) console.error(err);
-
-      return res.end(data);
-    });
-  } catch (err) {
-    console.error(err);
-
-    if (err.code === "NO_FOLDER_FOUND") {
-      ejs.renderFile(
-        "./static/error.ejs",
-        { message: err.message },
-        (err, data) => {
-          if (err) console.error(err);
-
-          return res.end(data);
-        },
-      );
-    }
-  }
 };
 
 /**
@@ -73,7 +31,7 @@ const getFiles = async (picturesPath, filterBy) => {
     if (err.code === "ENOENT") {
       throw new AppError(
         `no folder ${path.resolve(picturesPath)}. make sure folder exists`,
-        "NO_FOLDER_FOUND",
+        "NO_FOLDER_FOUND"
       );
     }
   }

@@ -1,0 +1,98 @@
+---
+import { getGroups, getPicturesPath } from "@/utils.js";
+
+const {req} = Astro.request
+const searchParams = new URL(
+  req.url,
+  process.env.HOST ?? "http://localhost:3000/",
+).searchParams;
+const groupToFilterBy = searchParams.get("group") ?? "";
+
+try {
+  const picturesPath = getPicturesPath();
+  const files = await getFiles(picturesPath, groupToFilterBy);
+} catch (err) {
+  console.error(err);
+
+  if (err.code === "NO_FOLDER_FOUND") {
+    ejs.renderFile(
+      "./static/error.ejs",
+      { message: err.message },
+      (err, data) => {
+        if (err) console.error(err);
+
+        return res.end(data);
+      },
+    );
+  }
+}
+
+const groups = getGroups();
+---
+
+<h1>Print</h1>
+
+    <header class="no-print">
+      <h1>Kader app</h1>
+<p>Showing { files.length } photos</p>
+
+      <form action="/" method="get">
+        <label for="group">Choose group to display, select none to display all</label>
+
+        <select id="group" name="group">
+{groups.forEach(g => (
+      <option value="<%= g%>">{g}</option>
+ ))}
+        </select>
+
+        <button type="submit">submit</button>
+      </form>
+    </header>
+
+    <ul class="grid">
+{files.map((f) => (
+      <li>
+    <img src="{f}" alt="<>"/> 
+      </li>
+))}
+    </ul>
+  
+
+    <style>
+    body {
+      margin: 0;
+    }
+
+    @media print {
+      body {
+        margin: 0;
+      }
+
+      .no-print {
+        display: none;
+      }
+    }
+
+    header {
+      padding: 1rem 1.5rem;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+      width: 3cm;
+      height: 4cm;
+      object-fit: cover;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, 3cm);
+    }
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    </style>
