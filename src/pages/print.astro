@@ -1,98 +1,71 @@
 ---
-import { getGroups, getPicturesPath } from "@/utils.js";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { Image } from "astro:assets";
 
-const {req} = Astro.request
-const searchParams = new URL(
-  req.url,
-  process.env.HOST ?? "http://localhost:3000/",
-).searchParams;
+import { getGroups, getPicturesPath, getFiles } from "@/utils";
+
+const searchParams = new URL(Astro.url).searchParams;
 const groupToFilterBy = searchParams.get("group") ?? "";
 
-try {
-  const picturesPath = getPicturesPath();
-  const files = await getFiles(picturesPath, groupToFilterBy);
-} catch (err) {
-  console.error(err);
-
-  if (err.code === "NO_FOLDER_FOUND") {
-    ejs.renderFile(
-      "./static/error.ejs",
-      { message: err.message },
-      (err, data) => {
-        if (err) console.error(err);
-
-        return res.end(data);
-      },
-    );
-  }
-}
+const picturesPath = getPicturesPath();
+const { files, error } = await getFiles(picturesPath, groupToFilterBy);
 
 const groups = getGroups();
 ---
 
-<h1>Print</h1>
+<BaseLayout title="Kader App | Print">
+  {error && error.code === "NO_FOLDER_FOUND" && <p>no folder found</p>}
 
-    <header class="no-print">
+  <main class="grid gap-4 grid-cols-2 max-w-7xl mx-auto">
+    <header class="print:hidden px-6 py-4">
       <h1>Kader app</h1>
-<p>Showing { files.length } photos</p>
+      {files ? <p>Showing {files.length} photos</p> : <p>No images found.</p>}
 
-      <form action="/" method="get">
-        <label for="group">Choose group to display, select none to display all</label>
-
-        <select id="group" name="group">
-{groups.forEach(g => (
-      <option value="<%= g%>">{g}</option>
- ))}
-        </select>
-
-        <button type="submit">submit</button>
-      </form>
+      <button id="print" class="btn btn-primary">print</button>
     </header>
 
-    <ul class="grid">
-{files.map((f) => (
-      <li>
-    <img src="{f}" alt="<>"/> 
-      </li>
-))}
+    <form
+      method="get"
+      class="print:hidden flex flex-col gap-4 outline-2 dark:outline-slate-500 px-6 py-4 my-4"
+    >
+      <label class="label" for="group"
+        >Choose group to display, select none to display all</label
+      >
+
+      <select id="group" name="group" class="select">
+        <option value="">None</option>
+        {groups.map((g) => <option value={g}>{g}</option>)}
+      </select>
+
+      <button class="btn" type="submit">submit</button>
+    </form>
+
+    <ul class="grid gap-0.5 photo-grid col-span-full">
+      {
+        files?.map((f) => (
+          <li>
+            <Image
+              width={300}
+              height={400}
+              src="https://unsplash.com"
+              alt="<>"
+              class="block max-w-full w-[3cm] h-[4cm] object-cover"
+            />
+            {f}
+          </li>
+        ))
+      }
     </ul>
-  
+  </main>
+</BaseLayout>
 
-    <style>
-    body {
-      margin: 0;
-    }
+<style>
+  .photo-grid {
+    grid-template-columns: repeat(auto-fit, 3cm);
+  }
+</style>
 
-    @media print {
-      body {
-        margin: 0;
-      }
-
-      .no-print {
-        display: none;
-      }
-    }
-
-    header {
-      padding: 1rem 1.5rem;
-    }
-
-    img {
-      display: block;
-      max-width: 100%;
-      width: 3cm;
-      height: 4cm;
-      object-fit: cover;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, 3cm);
-    }
-
-    ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-    </style>
+<script>
+  const button = document.getElementById("print");
+  button?.addEventListener("click", () => window.print());
+</script>
