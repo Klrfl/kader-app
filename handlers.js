@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import ejs from "ejs";
 import path from "node:path";
 import { AppError } from "./errors.js";
+import { getGroups, getPicturesPath } from "./utils.js";
 
 /**
  * @param req typeof IncomingMessage
@@ -21,9 +22,10 @@ export const indexHandler = async (req, res) => {
 
   try {
     const indexPath = "./static/index.ejs";
-    const picturesPath = "../compressed";
+    const picturesPath = getPicturesPath();
 
     const files = await getFiles(picturesPath, groupToFilterBy);
+    const groups = getGroups();
 
     const data = {
       files,
@@ -105,9 +107,9 @@ export const sendFile = async (req, res) => {
 
   const [_, extension] = match;
   const mimeType = mimeTypeTable[extension];
-  const filePath = "../compressed";
+  const picturesPath = getPicturesPath();
 
   res.writeHead(200, { "content-type": mimeType });
-  const data = await fs.readFile(path.join(filePath, url.pathname));
+  const data = await fs.readFile(path.join(picturesPath, url.pathname));
   return res.end(data);
 };
