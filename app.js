@@ -4,7 +4,9 @@ import { indexHandler, sendFile } from "./handlers.js";
 const server = createServer((req, res) => {
   console.log(req.method, req.url);
 
-  if (req.url.endsWith("/")) {
+  const reqUrl = new URL(req.url, "http://localhost:3000");
+
+  if (reqUrl.pathname === "/") {
     return indexHandler(req, res);
   }
 

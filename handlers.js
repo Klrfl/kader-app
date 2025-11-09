@@ -7,19 +7,31 @@ import { AppError } from "./errors.js";
  * @param req typeof IncomingMessage
  * @param res typeof ServerResponse
  */
-export const indexHandler = async (_, res) => {
-  const path = "./static/index.ejs";
+export const indexHandler = async (req, res) => {
   res.writeHead(200, {
     "content-type": "text/html",
     date: Date.now().toString(),
   });
 
+  const searchParams = new URL(
+    req.url,
+    process.env.HOST ?? "http://localhost:3000/",
+  ).searchParams;
+  const groupToFilterBy = searchParams.get("group");
+
   try {
+    const indexPath = "./static/index.ejs";
     const picturesPath = "../compressed";
 
-    const files = await getFiles(picturesPath);
+    const files = await getFiles(picturesPath, groupToFilterBy);
+
+    const data = {
+      files,
+      groups,
+    };
+
     // https://dev.to/webduvet/static-content-server-with-nodejs-without-frameworks-d61
-    ejs.renderFile(path, { files }, (err, data) => {
+    ejs.renderFile(indexPath, data, (err, data) => {
       if (err) console.error(err);
 
       return res.end(data);
@@ -43,13 +55,16 @@ export const indexHandler = async (_, res) => {
 
 /**
  * get path to your image files
- * @type (picturesPath: string) => Promise<string[]>
+ * @type (picturesPath: string, filterBy: string) => Promise<string[]>
  * */
-const getFiles = async (picturesPath) => {
+const getFiles = async (picturesPath, filterBy) => {
   try {
     const files = await fs.readdir(path.resolve(picturesPath));
 
-    const filteredFiles = files.filter((f) => f.match(/.*\.jpe?g$/));
+    const filteredFiles = files
+      .filter((f) => f.match(/.*\.jpe?g$/))
+      .filter((f) => f.startsWith(filterBy));
+
     return filteredFiles;
   } catch (err) {
     // rewrap with a more readable error
@@ -77,8 +92,19 @@ const mimeTypeTable = {
 export const sendFile = async (req, res) => {
   const url = new URL(req.url, "http://localhost:3000");
 
-  const [_, ext] = url.pathname.match(/.*.(jpe?g|png)$/);
-  const mimeType = mimeTypeTable[ext];
+  if (!url) {
+    res.writeHead(404);
+    return res.end(null);
+  }
+
+  const match = url.pathname.match(/\w*.(jpe?g|png)$/);
+  if (!match) {
+    res.writeHead(404);
+    return res.end(null);
+  }
+
+  const [_, extension] = match;
+  const mimeType = mimeTypeTable[extension];
   const filePath = "../compressed";
 
   res.writeHead(200, { "content-type": mimeType });

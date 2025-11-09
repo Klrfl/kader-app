@@ -6,6 +6,10 @@
     <title>Hai</title>
 
     <style>
+    body {
+      margin: 0;
+    }
+
     @media print {
       body {
         margin: 0;
@@ -14,6 +18,10 @@
       .no-print {
         display: none;
       }
+    }
+
+    header {
+      padding: 1rem 1.5rem;
     }
 
     img {
@@ -38,7 +46,21 @@
   </head>
 
   <body>
-    <h1 class="no-print">Hai</h1>
+    <header class="no-print">
+      <h1>Hai</h1>
+
+      <form action="/" method="get">
+        <label for="group">Choose group to display, select none to display all</label>
+
+        <select id="group" name="group">
+          <% groups.forEach(g => { %>
+            <option value="<%= g%>"><%= g %></option>
+          <% }) %>
+        </select>
+
+        <button type="submit">submit</button>
+      </form>
+    </header>
 
     <ul class="grid">
     <% files.forEach((f) => { %>
