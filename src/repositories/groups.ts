@@ -15,7 +15,10 @@ class SQLiteGroupRepository implements GroupRepository {
   }
 
   async getGroups(search?: string): Promise<Group[]> {
-    let query = this.db.selectFrom("groups").selectAll();
+    let query = this.db
+      .selectFrom("groups")
+      .selectAll()
+      .orderBy("groups.name", "asc");
 
     if (search) {
       query = query.where("name", "like", search);

@@ -1,17 +1,37 @@
 ---
 import MainLayout from "@/layouts/MainLayout.astro";
 import { db } from "@/database";
+import { sql } from "kysely";
 
 const q = Astro.url.searchParams.get("q");
-let dbQuery = db.selectFrom("students").selectAll();
+const nim = Astro.url.searchParams.get("nim");
+
+let dbQuery = db
+  .selectFrom("students as s")
+  .leftJoin("groups as g", "s.group_id", "g.id")
+  .select((eb) => [
+    "s.id",
+    "s.nim",
+    "s.name",
+    "s.nickname",
+    "s.instagram_handle",
+    "s.has_bonded_with",
+    "s.hobby",
+    "s.place_of_birth",
+    eb.fn.coalesce<string>("s.date_of_birth", sql`0`).as("date_of_birth"),
+    "s.blood_type",
+    "s.address",
+    "g.name as group_name",
+  ]);
 
 if (q) {
   dbQuery = dbQuery.where((eb) =>
-    eb.or([
-      eb("students.name", "like", `%${q}%`),
-      eb("students.nickname", "like", `%${q}%`),
-    ])
+    eb.or([eb("s.name", "like", `%${q}%`), eb("s.nickname", "like", `%${q}%`)])
   );
+}
+
+if (nim) {
+  dbQuery = dbQuery.where("nim", "like", `%${nim}`);
 }
 
 const students = await dbQuery.execute();
@@ -23,8 +43,18 @@ const students = await dbQuery.execute();
     <p>Showing {students.length} students of informatika, including you.</p>
 
     <form method="get" class="flex gap-x-4">
-      <label class="label" for="q">search</label>
+      <label class="label" for="q">name</label>
       <input class="input" type="text" name="q" id="q" value={q} />
+
+      <label for="nim" class="label">nim (last three digits)</label>
+      <input
+        class="input"
+        type="number"
+        inputmode="numeric"
+        name="nim"
+        id="nim"
+        value={nim}
+      />
       <button type="submit" class="btn btn-primary">Submit</button>
     </form>
   </header>
@@ -39,6 +69,7 @@ const students = await dbQuery.execute();
           <th> NIM </th>
           <th> Name </th>
           <th> Nickame </th>
+          <th> Group </th>
           <th> Hobby </th>
           <th> date of birth </th>
           <th> Place and date of birth </th>
@@ -69,6 +100,7 @@ const students = await dbQuery.execute();
               </a>
             </td>
             <td>{s.nickname}</td>
+            <td>{s.group_name}</td>
             <td class="max-w-48">{s.hobby}</td>
             <td>{new Date(s.date_of_birth).toLocaleDateString()}</td>
             <td>{s.place_of_birth}</td>
