@@ -2,13 +2,31 @@
 import MainLayout from "@/layouts/MainLayout.astro";
 import { db } from "@/database";
 
-const students = await db.selectFrom("students").selectAll().execute();
+const q = Astro.url.searchParams.get("q");
+let dbQuery = db.selectFrom("students").selectAll();
+
+if (q) {
+  dbQuery = dbQuery.where((eb) =>
+    eb.or([
+      eb("students.name", "like", `%${q}%`),
+      eb("students.nickname", "like", `%${q}%`),
+    ])
+  );
+}
+
+const students = await dbQuery.execute();
 ---
 
 <MainLayout>
-  <header>
+  <header class="py-4">
     <h1>Students</h1>
     <p>Showing {students.length} students of informatika, including you.</p>
+
+    <form method="get" class="flex gap-x-4">
+      <label class="label" for="q">search</label>
+      <input class="input" type="text" name="q" id="q" value={q} />
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
   </header>
 
   <div
