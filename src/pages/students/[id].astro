@@ -50,7 +50,9 @@ if (result && !result.error) {
         </label>
         <select class="select" name="group_id" id="group_id">
           {groups.map((group) => (
-            <option value={group.id}>{group.name}</option>
+            <option selected={group.id === student.group_id} value={group.id}>
+              {group.name}
+            </option>
           ))}
         </select>
 
@@ -61,6 +63,7 @@ if (result && !result.error) {
         <input
           class="checkbox"
           type="checkbox"
+          checked={Boolean(student.has_bonded_with)}
           name="has_bonded_with"
           id="has_bonded_with"
         />

@@ -2,9 +2,11 @@
 import MainLayout from "@/layouts/MainLayout.astro";
 import { db } from "@/database";
 import { sql } from "kysely";
+import { newGroupRepo } from "@/repositories/groups";
 
 const q = Astro.url.searchParams.get("q");
 const nim = Astro.url.searchParams.get("nim");
+const group_name = Astro.url.searchParams.get("group");
 
 let dbQuery = db
   .selectFrom("students as s")
@@ -33,100 +35,133 @@ if (q) {
 }
 
 if (nim) {
-  dbQuery = dbQuery.where("nim", "like", `%${nim}`);
+  dbQuery = dbQuery.where("s.nim", "like", `%${nim}`);
+}
+
+if (group_name && group_name !== "") {
+  dbQuery = dbQuery.where("g.name", "=", group_name);
 }
 
 const students = await dbQuery.execute();
+
+const studentsCount = students.length;
+const bondedWithCount = students
+  .filter((student) => Boolean(student.has_bonded_with))
+  .map(() => 1)
+  .reduce((acc, next) => acc + next, 0);
+const percentage = Math.round((bondedWithCount / studentsCount) * 100);
+
+const groups = await newGroupRepo().getGroups();
 ---
 
 <MainLayout>
-  <header class="py-4">
-    <h1>Students</h1>
-    <p>Showing {students.length} students of informatika, including you.</p>
+  <div class="grid grid-cols-6 gap-6">
+    <header class="py-4 col-span-2">
+      <h1 class="text-xl">Students</h1>
+      <p>
+        {bondedWithCount}/{studentsCount}
+        <span class="font-bold">({percentage}%)</span>
+      </p>
+      <p>
+        Showing {studentsCount} students of informatika, including you.
+      </p>
 
-    <form method="get" class="flex gap-x-4">
-      <label class="label" for="q">name</label>
-      <input class="input" type="text" name="q" id="q" value={q} />
+      <form method="get" class="flex flex-col gap-2 py-4">
+        <label class="label" for="q">name</label>
+        <input class="w-full input" type="text" name="q" id="q" value={q} />
 
-      <label for="nim" class="label">nim (last three digits)</label>
-      <input
-        class="input"
-        type="number"
-        inputmode="numeric"
-        name="nim"
-        id="nim"
-        value={nim}
-      />
-      <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
-  </header>
+        <label class="label" for="group">group</label>
+        <select class="w-full select" name="group" id="group">
+          <option value=""> None </option>
+          {
+            groups.map((group) => (
+              <option value={group.name} selected={group.name === group_name}>
+                {group.name}
+              </option>
+            ))
+          }
+        </select>
 
-  <div
-    class="max-w-full max-h-[80vh] overflow-auto rounded border border-base-content/20"
-  >
-    <table class="table table-hover table-pin-rows table-zebra min-w-max">
-      <thead>
-        <tr>
-          <th> No. </th>
-          <th> NIM </th>
-          <th> Name </th>
-          <th> Nickame </th>
-          <th> Group </th>
-          <th> Hobby </th>
-          <th> date of birth </th>
-          <th> Place and date of birth </th>
-          <th> instagram handle </th>
-          <th> blood type </th>
-          <th> has bonded with? </th>
-        </tr>
-      </thead>
+        <label for="nim" class="label">nim (last three digits)</label>
+        <input
+          class="w-full input"
+          type="number"
+          inputmode="numeric"
+          name="nim"
+          id="nim"
+          value={nim}
+        />
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </header>
 
-      {
-        students?.map((s, i) => (
-          <tr
-            class:list={[
-              {
-                "bg-green-700/20": s.has_bonded_with !== 0,
-                "bg-red-700/15": s.has_bonded_with === 0,
-              },
-            ]}
-          >
-            <td>{i + 1}</td>
-            <td>{s.nim}</td>
-            <td>
-              <a
-                class="link link-hover px-4 py-2 block"
-                href={`/students/${s.id}`}
-              >
-                {s.name}
-              </a>
-              {s.image_filename && (
-                <img
-                  src={`/images/${s.image_filename}`}
-                  alt={s.name}
-                  width="75"
-                  height="100"
-                />
-              )}
-            </td>
-            <td>{s.nickname}</td>
-            <td>{s.group_name}</td>
-            <td class="max-w-48">{s.hobby}</td>
-            <td>{new Date(s.date_of_birth).toLocaleDateString()}</td>
-            <td>{s.place_of_birth}</td>
-            <td>
-              <a
-                class="link"
-                href={`https://instagram.com/${s.instagram_handle}`}
-              >
-                {s.instagram_handle}
-              </a>
-            </td>
-            <td>{s.blood_type}</td>
-            <td>{s.has_bonded_with === 0 ? "x" : "v"}</td>
+    <div
+      class="max-w-full max-h-[80vh] overflow-auto rounded border border-base-content/20 col-span-4"
+    >
+      <table class="table table-hover table-pin-rows table-zebra min-w-max">
+        <thead>
+          <tr>
+            <th> No. </th>
+            <th> NIM </th>
+            <th> Name </th>
+            <th> Nickame </th>
+            <th> Group </th>
+            <th> Hobby </th>
+            <th> date of birth </th>
+            <th> Place and date of birth </th>
+            <th> instagram handle </th>
+            <th> blood type </th>
+            <th> has bonded with? </th>
           </tr>
-        ))
-      }
-    </table>
+        </thead>
+
+        {
+          students?.map((s, i) => (
+            <tr
+              class:list={[
+                {
+                  "bg-green-700/20": s.has_bonded_with !== 0,
+                  "bg-red-700/15": s.has_bonded_with === 0,
+                },
+              ]}
+            >
+              <td>{i + 1}</td>
+              <td>{s.nim}</td>
+              <td>
+                <a
+                  class="link link-hover px-4 py-2 block"
+                  href={`/students/${s.id}`}
+                >
+                  {s.name}
+                </a>
+                {s.image_filename && (
+                  <img
+                    src={`/images/${s.image_filename}`}
+                    alt={s.name}
+                    width="75"
+                    height="100"
+                  />
+                )}
+              </td>
+              <td>{s.nickname}</td>
+              <td>{s.group_name}</td>
+              <td class="max-w-48">{s.hobby}</td>
+              <td>{new Date(s.date_of_birth).toLocaleDateString()}</td>
+              <td>{s.place_of_birth}</td>
+              <td>
+                <a
+                  class="link"
+                  href={`https://instagram.com/${s.instagram_handle}`}
+                >
+                  {s.instagram_handle}
+                </a>
+              </td>
+              <td>{s.blood_type}</td>
+              <td>{s.has_bonded_with === 0 ? "x" : "v"}</td>
+            </tr>
+          ))
+        }
+      </table>
+    </div>
   </div>
 </MainLayout>
