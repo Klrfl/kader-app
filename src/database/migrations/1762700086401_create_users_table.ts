@@ -14,6 +14,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn("nim", "text")
     .addColumn("instagram_handle", "text")
     .addColumn("date_of_birth", "timestamp")
+    .addColumn("place_of_birth", "text")
     .addColumn("blood_type", "text")
     .addColumn("address", "text")
     .execute();

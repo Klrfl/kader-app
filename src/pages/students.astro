@@ -1,11 +1,40 @@
 ---
+import MainLayout from "@/layouts/MainLayout.astro";
 import { db } from "@/database";
 
 const students = await db.selectFrom("students").selectAll().execute();
 ---
 
-<h1>Students</h1>
+<MainLayout>
+  <h1>Students</h1>
+  <p>Students of informatika</p>
 
-<ul>
-  {students?.map((s) => <li>{s.name}</li>)}
-</ul>
+  <table class="table table-zebra">
+    <thead>
+      <tr>
+        <th> NIM </th>
+        <th> Name </th>
+        <th> Nickame </th>
+        <th> Hobby </th>
+        <th> date of birth </th>
+        <th> Place and date of birth </th>
+        <th> instagram handle </th>
+        <th></th>
+      </tr>
+    </thead>
+
+    {
+      students?.map((s) => (
+        <tr>
+          <td>{s.nim}</td>
+          <td>{s.name}</td>
+          <td>{s.nickname}</td>
+          <td>{s.hobby}</td>
+          <td>{new Date(s.date_of_birth).toLocaleDateString()}</td>
+          <td>{s.place_of_birth}</td>
+          <td>{s.instagram_handle}</td>
+        </tr>
+      ))
+    }
+  </table>
+</MainLayout>
