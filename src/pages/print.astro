@@ -4,6 +4,7 @@ import { Image } from "astro:assets";
 
 import { getGroups, getPicturesPath } from "@/utils";
 import { newImageRepo } from "@/repositories/images";
+import { newGroupRepo } from "@/repositories/groups";
 
 const searchParams = new URL(Astro.url).searchParams;
 // const groupToFilterBy = searchParams.get("group") ?? "";
@@ -12,9 +13,11 @@ const searchParams = new URL(Astro.url).searchParams;
 // const { files, error } = await getFiles(picturesPath, groupToFilterBy);
 
 const imageRepo = newImageRepo();
-const files = imageRepo.getImages();
+const files = await imageRepo.getImages();
 const error = null;
-const groups = getGroups();
+
+const groupRepo = newGroupRepo();
+const groups = await groupRepo.getGroups();
 ---
 
 <BaseLayout title="Kader App | Print">
@@ -23,7 +26,13 @@ const groups = getGroups();
   <main class="grid gap-4 grid-cols-2 max-w-7xl mx-auto">
     <header class="print:hidden px-6 py-4">
       <h1>Kader app</h1>
-      {files ? <p>Showing {files.length} photos</p> : <p>No images found.</p>}
+      {
+        files.length ? (
+          <p>Showing {files.length} photos</p>
+        ) : (
+          <p>No images found.</p>
+        )
+      }
 
       <button id="print" class="btn btn-primary">print</button>
     </header>
@@ -38,7 +47,7 @@ const groups = getGroups();
 
       <select id="group" name="group" class="select">
         <option value="">None</option>
-        {groups.map((g) => <option value={g}>{g}</option>)}
+        {groups.map((g) => <option value={g.id}>{g.name}</option>)}
       </select>
 
       <button class="btn" type="submit">submit</button>

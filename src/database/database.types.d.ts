@@ -3,4 +3,39 @@
  * Please do not edit it manually.
  */
 
-export interface DB {}
+import type { ColumnType } from "kysely";
+
+export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
+  ? ColumnType<S, I | undefined, U>
+  : ColumnType<T, T | undefined, T>;
+
+export interface Groups {
+  id: Generated<number>;
+  name: string;
+}
+
+export interface Images {
+  created_at: Generated<string | null>;
+  filename: string | null;
+  id: Generated<number>;
+  student_id: number;
+}
+
+export interface Students {
+  address: string | null;
+  blood_type: string | null;
+  date_of_birth: string | null;
+  group_id: number;
+  hobby: string | null;
+  id: Generated<number>;
+  instagram_handle: string | null;
+  name: string | null;
+  nickname: string | null;
+  nim: string | null;
+}
+
+export interface DB {
+  groups: Groups;
+  images: Images;
+  students: Students;
+}

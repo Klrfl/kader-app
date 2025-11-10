@@ -1,9 +1,10 @@
 import { db } from "@/database";
 import type { DB } from "@/database/database.types";
+import type { Image } from "@/types";
 import type { Kysely } from "kysely";
 
 interface ImageRepository {
-  getImages(filterBy?: string): Promise<string[]>;
+  getImages(filterBy?: string): Promise<Image[]>;
 }
 
 export class SQLiteImageRepo implements ImageRepository {
@@ -14,9 +15,11 @@ export class SQLiteImageRepo implements ImageRepository {
 
   getImages(filterBy?: string) {
     const images = this.db
-      .selectFrom("images")
+      .selectFrom("images as i")
       .selectAll()
-      .where("name", "=", filterBy)
+      .leftJoin("students as s", "s.id", "i.student_id")
+      .leftJoin("groups as g", "g.id", "s.group_id")
+      .where("g.name", "=", filterBy ?? "")
       .execute();
 
     return images;

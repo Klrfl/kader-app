@@ -1,8 +1,8 @@
 import type { Kysely } from "kysely";
 
-// replace `any` with your database interface.
 export async function seed(db: Kysely<any>): Promise<void> {
-  db.insertInto("groups")
+  await db
+    .insertInto("groups")
     .values([
       { name: "adarna" },
       { name: "sankova" },
