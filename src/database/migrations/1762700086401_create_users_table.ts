@@ -2,7 +2,7 @@ import type { Kysely } from "kysely";
 
 // `any` is required here since migrations should be frozen in time. alternatively, keep a "snapshot" db interface.
 export async function up(db: Kysely<any>): Promise<void> {
-  db.schema
+  await db.schema
     .createTable("students")
     .addColumn("id", "integer", (c) => c.primaryKey().notNull().autoIncrement())
     .addColumn("group_id", "integer", (c) =>
@@ -22,5 +22,5 @@ export async function up(db: Kysely<any>): Promise<void> {
 
 // `any` is required here since migrations should be frozen in time. alternatively, keep a "snapshot" db interface.
 export async function down(db: Kysely<any>): Promise<void> {
-  db.schema.dropTable("students").execute();
+  await db.schema.dropTable("students").execute();
 }

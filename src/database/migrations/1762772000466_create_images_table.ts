@@ -3,7 +3,7 @@ import { sql } from "kysely";
 
 // `any` is required here since migrations should be frozen in time. alternatively, keep a "snapshot" db interface.
 export async function up(db: Kysely<any>): Promise<void> {
-  db.schema
+  await db.schema
     .createTable("images")
     .addColumn("id", "integer", (c) => c.primaryKey().notNull().autoIncrement())
     .addColumn("student_id", "integer", (c) =>
@@ -20,5 +20,5 @@ export async function up(db: Kysely<any>): Promise<void> {
 
 // `any` is required here since migrations should be frozen in time. alternatively, keep a "snapshot" db interface.
 export async function down(db: Kysely<any>): Promise<void> {
-  db.schema.dropTable("images").execute();
+  await db.schema.dropTable("images").execute();
 }
