@@ -1,1 +1,14 @@
-<h1>Groups</h1>
+---
+import MainLayout from "@/layouts/MainLayout.astro";
+import { newGroupRepo } from "@/repositories/groups";
+
+const groups = await newGroupRepo().getGroups();
+---
+
+<MainLayout>
+  <h1>Groups</h1>
+
+  <ul>
+    {groups.map((group) => <li>{group.name}</li>)}
+  </ul>
+</MainLayout>
