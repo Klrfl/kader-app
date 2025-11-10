@@ -9,6 +9,7 @@ const nim = Astro.url.searchParams.get("nim");
 let dbQuery = db
   .selectFrom("students as s")
   .leftJoin("groups as g", "s.group_id", "g.id")
+  .leftJoin("images as i", "student_id", "s.id")
   .select((eb) => [
     "s.id",
     "s.nim",
@@ -21,6 +22,7 @@ let dbQuery = db
     eb.fn.coalesce<string>("s.date_of_birth", sql`0`).as("date_of_birth"),
     "s.blood_type",
     "s.address",
+    "i.filename as image_filename",
     "g.name as group_name",
   ]);
 
@@ -98,6 +100,14 @@ const students = await dbQuery.execute();
               >
                 {s.name}
               </a>
+              {s.image_filename && (
+                <img
+                  src={`/images/${s.image_filename}`}
+                  alt={s.name}
+                  width="75"
+                  height="100"
+                />
+              )}
             </td>
             <td>{s.nickname}</td>
             <td>{s.group_name}</td>

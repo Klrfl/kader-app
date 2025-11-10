@@ -13,14 +13,18 @@ export class SQLiteImageRepo implements ImageRepository {
     this.db = db;
   }
 
-  getImages(filterBy?: string) {
-    const images = this.db
+  async getImages(filterBy?: string) {
+    let query = this.db
       .selectFrom("images as i")
       .selectAll()
       .leftJoin("students as s", "s.id", "i.student_id")
-      .leftJoin("groups as g", "g.id", "s.group_id")
-      .where("g.name", "=", filterBy ?? "")
-      .execute();
+      .leftJoin("groups as g", "g.id", "s.group_id");
+
+    if (filterBy) {
+      query = query.where("g.name", "=", filterBy ?? "");
+    }
+
+    const images = await query.execute();
 
     return images;
   }

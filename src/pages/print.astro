@@ -9,7 +9,7 @@ const searchParams = new URL(Astro.url).searchParams;
 const groupToFilterBy = searchParams.get("group") ?? "";
 
 const imageRepo = newImageRepo();
-const files = await imageRepo.getImages();
+const images = await imageRepo.getImages();
 const error = null;
 
 const groupRepo = newGroupRepo();
@@ -23,8 +23,8 @@ const groups = await groupRepo.getGroups(groupToFilterBy);
     <header class="print:hidden px-6 py-4">
       <h1>Kader app</h1>
       {
-        files.length ? (
-          <p>Showing {files.length} photos</p>
+        images.length ? (
+          <p>Showing {images.length} photos</p>
         ) : (
           <p>No images found.</p>
         )
@@ -51,7 +51,7 @@ const groups = await groupRepo.getGroups(groupToFilterBy);
 
     <ul class="grid gap-0.5 photo-grid col-span-full">
       {
-        files?.map((f) => (
+        images?.map((f) => (
           <li>
             <Image
               width={300}
@@ -60,7 +60,7 @@ const groups = await groupRepo.getGroups(groupToFilterBy);
               alt={f.student_id}
               class="block max-w-full w-[3cm] h-[4cm] object-cover"
             />
-            {f}
+            <p class="print:hidden">{f.filename}</p>
           </li>
         ))
       }
