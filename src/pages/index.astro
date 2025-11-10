@@ -1,9 +1,9 @@
 ---
-import BaseLayout from "@/layouts/BaseLayout.astro";
+import MainLayout from "@/layouts/MainLayout.astro";
 ---
 
-<BaseLayout title="Kader App | Home">
-  <main
+<MainLayout title="Kader App | Home">
+  <article
     class="flex flex-col gap-4 justify-center items-center min-h-screen min-w-full"
   >
     <h1>Kader App</h1>
@@ -16,5 +16,5 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
       </li>
       <li><a class="w-full btn btn-primary" href="/groups/">View groups</a></li>
     </ul>
-  </main>
-</BaseLayout>
+  </article>
+</MainLayout>

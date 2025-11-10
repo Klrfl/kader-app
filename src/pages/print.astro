@@ -1,29 +1,25 @@
 ---
-import BaseLayout from "@/layouts/BaseLayout.astro";
+import MainLayout from "@/layouts/MainLayout.astro";
 import { Image } from "astro:assets";
 
-import { getGroups, getPicturesPath } from "@/utils";
 import { newImageRepo } from "@/repositories/images";
 import { newGroupRepo } from "@/repositories/groups";
 
 const searchParams = new URL(Astro.url).searchParams;
-// const groupToFilterBy = searchParams.get("group") ?? "";
-//
-// const picturesPath = getPicturesPath();
-// const { files, error } = await getFiles(picturesPath, groupToFilterBy);
+const groupToFilterBy = searchParams.get("group") ?? "";
 
 const imageRepo = newImageRepo();
 const files = await imageRepo.getImages();
 const error = null;
 
 const groupRepo = newGroupRepo();
-const groups = await groupRepo.getGroups();
+const groups = await groupRepo.getGroups(groupToFilterBy);
 ---
 
-<BaseLayout title="Kader App | Print">
+<MainLayout title="Kader App | Print">
   {error && error.code === "NO_FOLDER_FOUND" && <p>no folder found</p>}
 
-  <main class="grid gap-4 grid-cols-2 max-w-7xl mx-auto">
+  <article class="grid gap-4 grid-cols-2">
     <header class="print:hidden px-6 py-4">
       <h1>Kader app</h1>
       {
@@ -60,8 +56,8 @@ const groups = await groupRepo.getGroups();
             <Image
               width={300}
               height={400}
-              src={`/images/${f}`}
-              alt="<>"
+              src={`/images/${f.filename}`}
+              alt={f.student_id}
               class="block max-w-full w-[3cm] h-[4cm] object-cover"
             />
             {f}
@@ -69,8 +65,8 @@ const groups = await groupRepo.getGroups();
         ))
       }
     </ul>
-  </main>
-</BaseLayout>
+  </article>
+</MainLayout>
 
 <style>
   .photo-grid {

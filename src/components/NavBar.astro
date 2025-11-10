@@ -1,0 +1,47 @@
+---
+const current = new URL(Astro.url);
+
+const links = [
+  {
+    href: "/",
+    label: "Home",
+  },
+  {
+    href: "/students",
+    label: "Students",
+  },
+  {
+    href: "/groups",
+    label: "Groups",
+  },
+  {
+    href: "/print",
+    label: "Print",
+  },
+] as const;
+---
+
+<nav class="navbar sm:to-md:px-6 py-4 max-w-7xl mx-auto">
+  <p class="navbar-start">Kader App</p>
+
+  <ul class="navbar-end gap-x-2">
+    {
+      links.map((link) => (
+        <li>
+          <a
+            class:list={[
+              "btn",
+              "btn-soft",
+              {
+                "btn-primary": current.pathname === link.href,
+              },
+            ]}
+            href={link.href}
+          >
+            {link.label}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
