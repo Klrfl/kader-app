@@ -6,35 +6,60 @@ const students = await db.selectFrom("students").selectAll().execute();
 ---
 
 <MainLayout>
-  <h1>Students</h1>
-  <p>Students of informatika</p>
+  <header>
+    <h1>Students</h1>
+    <p>Showing {students.length} students of informatika, including you.</p>
+  </header>
 
-  <table class="table table-zebra">
-    <thead>
-      <tr>
-        <th> NIM </th>
-        <th> Name </th>
-        <th> Nickame </th>
-        <th> Hobby </th>
-        <th> date of birth </th>
-        <th> Place and date of birth </th>
-        <th> instagram handle </th>
-        <th></th>
-      </tr>
-    </thead>
-
-    {
-      students?.map((s) => (
+  <div
+    class="max-w-full max-h-[80vh] overflow-auto rounded border border-base-content/20"
+  >
+    <table class="table table-hover table-pin-rows table-zebra min-w-max">
+      <thead>
         <tr>
-          <td>{s.nim}</td>
-          <td>{s.name}</td>
-          <td>{s.nickname}</td>
-          <td>{s.hobby}</td>
-          <td>{new Date(s.date_of_birth).toLocaleDateString()}</td>
-          <td>{s.place_of_birth}</td>
-          <td>{s.instagram_handle}</td>
+          <th> No. </th>
+          <th> NIM </th>
+          <th> Name </th>
+          <th> Nickame </th>
+          <th> Hobby </th>
+          <th> date of birth </th>
+          <th> Place and date of birth </th>
+          <th> instagram handle </th>
+          <th> blood type </th>
+          <th> has bonded with? </th>
         </tr>
-      ))
-    }
-  </table>
+      </thead>
+
+      {
+        students?.map((s, i) => (
+          <tr
+            class:list={[
+              {
+                "bg-green-700/20": s.has_bonded_with !== 0,
+                "bg-red-700/15": s.has_bonded_with === 0,
+              },
+            ]}
+          >
+            <td>{i + 1}</td>
+            <td>{s.nim}</td>
+            <td>{s.name}</td>
+            <td>{s.nickname}</td>
+            <td class="max-w-48">{s.hobby}</td>
+            <td>{new Date(s.date_of_birth).toLocaleDateString()}</td>
+            <td>{s.place_of_birth}</td>
+            <td>
+              <a
+                class="link"
+                href={`https://instagram.com/${s.instagram_handle}`}
+              >
+                {s.instagram_handle}
+              </a>
+            </td>
+            <td>{s.blood_type}</td>
+            <td>{s.has_bonded_with === 0 ? "x" : "v"}</td>
+          </tr>
+        ))
+      }
+    </table>
+  </div>
 </MainLayout>
