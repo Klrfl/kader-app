@@ -1,0 +1,78 @@
+---
+import { db } from "@/database";
+import MainLayout from "@/layouts/MainLayout.astro";
+
+import { actions } from "astro:actions";
+import { newGroupRepo } from "@/repositories/groups";
+
+const { id } = Astro.params;
+if (!id || Number.isNaN(Number(id))) throw new Error("no id");
+
+const student = await db
+  .selectFrom("students")
+  .where("id", "=", Number(id))
+  .selectAll()
+  .executeTakeFirst();
+
+const title = `Kader App | ${student?.name}`;
+
+const groups = await newGroupRepo().getGroups();
+
+const result = Astro.getActionResult(actions.students.update);
+
+if (result && !result.error) {
+  return Astro.redirect("/students");
+}
+---
+
+<MainLayout title={title}>
+  {
+    student && (
+      <form
+        action={actions.students.update}
+        method="post"
+        class="px-6 py-4 grid grid-cols-2 gap-4 max-w-2xl rounded border-2 border-accent-content/20"
+      >
+        <input type="hidden" name="id" value={student.id} />
+        <label class="label" for="name">
+          Name
+        </label>
+        <input
+          class="input"
+          type="text"
+          name="name"
+          id="name"
+          value={student.name}
+        />
+
+        <label class="label" for="group_id">
+          Group
+        </label>
+        <select class="select" name="group_id" id="group_id">
+          {groups.map((group) => (
+            <option value={group.id}>{group.name}</option>
+          ))}
+        </select>
+
+        <label class="label" for="has_bonded_with">
+          Has bonded with?
+        </label>
+
+        <input
+          class="checkbox"
+          type="checkbox"
+          name="has_bonded_with"
+          id="has_bonded_with"
+        />
+
+        <button
+          class="btn btn-primary"
+          type="submit"
+          class="col-span-2 self-end"
+        >
+          submit
+        </button>
+      </form>
+    )
+  }
+</MainLayout>

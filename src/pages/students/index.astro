@@ -42,7 +42,14 @@ const students = await db.selectFrom("students").selectAll().execute();
           >
             <td>{i + 1}</td>
             <td>{s.nim}</td>
-            <td>{s.name}</td>
+            <td>
+              <a
+                class="link link-hover px-4 py-2 block"
+                href={`/students/${s.id}`}
+              >
+                {s.name}
+              </a>
+            </td>
             <td>{s.nickname}</td>
             <td class="max-w-48">{s.hobby}</td>
             <td>{new Date(s.date_of_birth).toLocaleDateString()}</td>
