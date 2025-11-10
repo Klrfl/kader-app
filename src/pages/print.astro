@@ -2,14 +2,18 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { Image } from "astro:assets";
 
-import { getGroups, getPicturesPath, getFiles } from "@/utils";
+import { getGroups, getPicturesPath } from "@/utils";
+import { newImageRepo } from "@/repositories/images";
 
 const searchParams = new URL(Astro.url).searchParams;
-const groupToFilterBy = searchParams.get("group") ?? "";
+// const groupToFilterBy = searchParams.get("group") ?? "";
+//
+// const picturesPath = getPicturesPath();
+// const { files, error } = await getFiles(picturesPath, groupToFilterBy);
 
-const picturesPath = getPicturesPath();
-const { files, error } = await getFiles(picturesPath, groupToFilterBy);
-
+const imageRepo = newImageRepo();
+const files = imageRepo.getImages();
+const error = null;
 const groups = getGroups();
 ---
 
@@ -47,7 +51,7 @@ const groups = getGroups();
             <Image
               width={300}
               height={400}
-              src="https://unsplash.com"
+              src={`/images/${f}`}
               alt="<>"
               class="block max-w-full w-[3cm] h-[4cm] object-cover"
             />

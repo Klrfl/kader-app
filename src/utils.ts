@@ -33,24 +33,24 @@ export const getFiles = async (
   picturesPath: string,
   filterBy: string
 ): Promise<{ files: string[] | null; error: AppError | null }> => {
-  try {
-    const files = await fs.readdir(path.resolve(picturesPath));
-
-    const filteredFiles = files
-      .filter((f) => f.match(/.*\.jpe?g$/))
-      .filter((f) => f.startsWith(filterBy));
-
-    return { files: filteredFiles, error: null };
-  } catch (err: unknown) {
-    if (err instanceof AppError && err.code === "ENOENT") {
-      const error = new AppError(
-        `no folder ${path.resolve(picturesPath)}. make sure folder exists`,
-        "NO_FOLDER_FOUND"
-      );
-
-      return { files: null, error };
-    }
-  }
+  // try {
+  //   const files = await fs.readdir(path.resolve(picturesPath));
+  //
+  //   const filteredFiles = files
+  //     .filter((f) => f.match(/.*\.jpe?g$/))
+  //     .filter((f) => f.startsWith(filterBy));
+  //
+  //   return { files: filteredFiles, error: null };
+  // } catch (err: unknown) {
+  //   if (err instanceof AppError && err.code === "ENOENT") {
+  //     const error = new AppError(
+  //       `no folder ${path.resolve(picturesPath)}. make sure folder exists`,
+  //       "NO_FOLDER_FOUND"
+  //     );
+  //
+  //     return { files: null, error };
+  //   }
+  // }
 
   return { files: null, error: null };
 };
