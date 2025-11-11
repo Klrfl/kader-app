@@ -1,48 +1,17 @@
 ---
 import MainLayout from "@/layouts/MainLayout.astro";
-import { db } from "@/database";
-import { sql } from "kysely";
 import { newGroupRepo } from "@/repositories/groups";
+import { newStudentRepo } from "@/repositories/students";
 
-const q = Astro.url.searchParams.get("q");
-const nim = Astro.url.searchParams.get("nim");
-const group_name = Astro.url.searchParams.get("group");
+const q = Astro.url.searchParams.get("q") ?? "";
+const nim = Astro.url.searchParams.get("nim") ?? "";
+const groupName = Astro.url.searchParams.get("group") ?? "";
 
-let dbQuery = db
-  .selectFrom("students as s")
-  .leftJoin("groups as g", "s.group_id", "g.id")
-  .leftJoin("images as i", "student_id", "s.id")
-  .select((eb) => [
-    "s.id",
-    "s.nim",
-    "s.name",
-    "s.nickname",
-    "s.instagram_handle",
-    "s.has_bonded_with",
-    "s.hobby",
-    "s.place_of_birth",
-    eb.fn.coalesce<string>("s.date_of_birth", sql`0`).as("date_of_birth"),
-    "s.blood_type",
-    "s.address",
-    "i.filename as image_filename",
-    "g.name as group_name",
-  ]);
-
-if (q) {
-  dbQuery = dbQuery.where((eb) =>
-    eb.or([eb("s.name", "like", `%${q}%`), eb("s.nickname", "like", `%${q}%`)])
-  );
-}
-
-if (nim) {
-  dbQuery = dbQuery.where("s.nim", "like", `%${nim}`);
-}
-
-if (group_name && group_name !== "") {
-  dbQuery = dbQuery.where("g.name", "=", group_name);
-}
-
-const students = await dbQuery.execute();
+const students = await newStudentRepo().getVerboseStudents({
+  query: q,
+  nim,
+  groupName,
+});
 
 const studentsCount = students.length;
 const bondedWithCount = students
@@ -75,7 +44,7 @@ const groups = await newGroupRepo().getGroups();
           <option value=""> None </option>
           {
             groups.map((group) => (
-              <option value={group.name} selected={group.name === group_name}>
+              <option value={group.name} selected={group.name === groupName}>
                 {group.name}
               </option>
             ))
