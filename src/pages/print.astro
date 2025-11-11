@@ -6,14 +6,18 @@ import { newImageRepo } from "@/repositories/images";
 import { newGroupRepo } from "@/repositories/groups";
 
 const searchParams = new URL(Astro.url).searchParams;
-const groupToFilterBy = searchParams.get("group") ?? "";
+const groupToFilterBy = Number(searchParams.get("group") ?? 0);
+const showPrinted = Boolean(searchParams.get("show_printed"));
 
 const imageRepo = newImageRepo();
-const images = await imageRepo.getImages();
+const images = await imageRepo.getImages({
+  groupId: groupToFilterBy,
+  showPrinted,
+});
 const error = null;
 
 const groupRepo = newGroupRepo();
-const groups = await groupRepo.getGroups(groupToFilterBy);
+const groups = await groupRepo.getGroups();
 ---
 
 <MainLayout title="Kader App | Print">
@@ -35,7 +39,7 @@ const groups = await groupRepo.getGroups(groupToFilterBy);
 
     <form
       method="get"
-      class="print:hidden flex flex-col gap-4 outline-2 dark:outline-slate-500 px-6 py-4 my-4"
+      class="print:hidden grid grid-cols-2 gap-4 outline-2 dark:outline-slate-500 px-6 py-4 my-4"
     >
       <label class="label" for="group"
         >Choose group to display, select none to display all</label
@@ -43,13 +47,29 @@ const groups = await groupRepo.getGroups(groupToFilterBy);
 
       <select id="group" name="group" class="select">
         <option value="">None</option>
-        {groups.map((g) => <option value={g.id}>{g.name}</option>)}
+        {
+          groups.map((g) => (
+            <option selected={g.id === groupToFilterBy} value={g.id}>
+              {g.name}
+            </option>
+          ))
+        }
       </select>
 
-      <button class="btn" type="submit">submit</button>
+      <label for="show_printed" class="label">Show printed pictures too?</label>
+      <input
+        type="checkbox"
+        class="checkbox peer"
+        name="show_printed"
+        checked={showPrinted}
+      />
+      <!-- <span class="hidden peer-checked:block">Yes</span> -->
+      <!-- <span class="peer-checked:hidden">No</span> -->
+
+      <button class="btn" type="submit" class="col-end-3">submit</button>
     </form>
 
-    <ul class="grid gap-0.5 photo-grid col-span-full">
+    <ul class="grid gap-y-0.25 photo-grid col-span-full">
       {
         images?.map((f) => (
           <li>

@@ -18,6 +18,7 @@ export interface Groups {
 export interface Images {
   created_at: Generated<string | null>;
   filename: string | null;
+  has_been_printed: Generated<number>;
   id: Generated<number>;
   student_id: number;
 }
