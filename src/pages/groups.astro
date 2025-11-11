@@ -2,13 +2,32 @@
 import MainLayout from "@/layouts/MainLayout.astro";
 import { newGroupRepo } from "@/repositories/groups";
 
-const groups = await newGroupRepo().getGroups();
+const groups = await newGroupRepo().getVerboseGroups();
 ---
 
 <MainLayout>
   <h1>Groups</h1>
 
-  <ul>
-    {groups.map((group) => <li>{group.name}</li>)}
+  <ul class="grid grid-cols-3 gap-4">
+    {
+      groups.map((group) => (
+        <li
+          class:list={[
+            "rounded border px-6 py-4",
+            {
+              "bg-green-700/30 border-green-700 light:text-white":
+                group.percentage === 100,
+              "border-base-content/30": group.percentage < 100,
+            },
+          ]}
+        >
+          <article>
+            <h2 class="text-xl">{group.name}</h2>
+            (bonded with {group.bonded_count} out of {group.student_count},{" "}
+            {group.percentage}% progress)
+          </article>
+        </li>
+      ))
+    }
   </ul>
 </MainLayout>
