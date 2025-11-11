@@ -1,16 +1,21 @@
 # buku biru paper generator
 
-this node app generates an html page that contains images laid out in a grid, that you can export to PDF or straight up print.
+this Astro SSR app generates an html page that contains images laid out in a grid that you can print and cut right away.
 
-### Before you use this
+All images are placed in the `public/` directory.
 
-this app expects images to be formatted like `group.nim-name.ext`, valid examples include:
+## 🧞 Commands
 
-- tsmc.123-chunli.jpg
-- pnb.456-rava.jpeg
-- whatevergroupname.255-janedoe.png
+All commands are run from the root of the project, from a terminal:
 
-If you want to contribute by adding a parser that can accept different name formats, you're very welcome
+| Command                | Action                                           |
+| :--------------------- | :----------------------------------------------- |
+| `pnpm install`         | Installs dependencies                            |
+| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
+| `pnpm build`           | Build your production site to `./dist/`          |
+| `pnpm preview`         | Preview your build locally, before deploying     |
+| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
+| `pnpm astro -- --help` | Get help using the Astro CLI                     |
 
 ### Quick start
 
@@ -31,14 +36,12 @@ corepack enable # or whatever installation method you prefer
 pnpm i
 ```
 
-to run the app, use node
+to run the app, use
 
 ```sh
-node --env-file=.env app.js
+pnpm dev
 ```
 
-then open localhost:3000 or whatever port you set.
+then open localhost:4321.
 
-## Todo
-
-- [x] create filter for kelompok
+Use the `database.sqlite` file as a base.
