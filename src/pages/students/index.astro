@@ -26,14 +26,19 @@ const groups = await newGroupRepo().getGroups();
 <MainLayout>
   <div class="grid grid-cols-6 gap-6">
     <header class="py-4 col-span-2">
-      <h1 class="text-xl">Students</h1>
+      <h1 class="text-xl"><span class="italic">{groupName}</span> Students</h1>
       <p>
         {bondedWithCount}/{studentsCount}
-        <span class="font-bold">({percentage}%)</span>
+        <span class="font-bold"
+          >({percentage}% {percentage === 100 && "🎉"})</span
+        >
       </p>
-      <p>
-        Showing {studentsCount} students of informatika, including you.
-      </p>
+
+      {
+        !q && !nim && !groupName && (
+          <p>Showing {studentsCount} students of Informatika, including you.</p>
+        )
+      }
 
       <form method="get" class="flex flex-col gap-2 py-4">
         <label class="label" for="q">name</label>
