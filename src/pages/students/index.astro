@@ -79,12 +79,13 @@ const groups = await newGroupRepo().getGroups();
             <th> NIM </th>
             <th> Name </th>
             <th> Nickame </th>
+            <th> Place and date of birth </th>
             <th> Group </th>
             <th> Hobby </th>
             <th> date of birth </th>
-            <th> Place and date of birth </th>
             <th> instagram handle </th>
             <th> blood type </th>
+            <th> address </th>
             <th> has bonded with? </th>
           </tr>
         </thead>
@@ -118,10 +119,10 @@ const groups = await newGroupRepo().getGroups();
                 )}
               </td>
               <td>{s.nickname}</td>
+              <td>{s.place_of_birth}</td>
               <td>{s.group_name}</td>
               <td class="max-w-48">{s.hobby}</td>
               <td>{new Date(s.date_of_birth).toLocaleDateString()}</td>
-              <td>{s.place_of_birth}</td>
               <td>
                 <a
                   class="link"
@@ -131,6 +132,7 @@ const groups = await newGroupRepo().getGroups();
                 </a>
               </td>
               <td>{s.blood_type}</td>
+              <td class="max-w-96">{s.address}</td>
               <td>{s.has_bonded_with === 0 ? "x" : "v"}</td>
             </tr>
           ))

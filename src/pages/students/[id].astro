@@ -11,27 +11,63 @@ if (!id || Number.isNaN(Number(id))) throw new Error("no id");
 const student = await db
   .selectFrom("students")
   .where("id", "=", Number(id))
-  .selectAll()
+  .select([
+    "id",
+    "group_id",
+    "name",
+    "date_of_birth",
+    "place_of_birth",
+    "instagram_handle",
+    "hobby",
+    "blood_type",
+    "address",
+    "has_bonded_with",
+  ])
   .executeTakeFirst();
 
-const title = `Kader App | ${student?.name}`;
-
 const groups = await newGroupRepo().getGroups();
+const bloodTypes = [
+  { name: "A" },
+  { name: "B" },
+  { name: "AB" },
+  { name: "O" },
+  { name: "A+" },
+  { name: "B+" },
+  { name: "A-" },
+  { name: "B-" },
+  { name: "O-" },
+  { name: "O+" },
+  { name: "AB-" },
+  { name: "AB+" },
+] as const;
+
+const dob = new Date(student?.date_of_birth);
+const year = dob.getFullYear();
+const month = dob.getMonth();
+const date = dob.getDate();
+const formattedDob = `${year}-${month}-${date}`;
 
 const result = Astro.getActionResult(actions.students.update);
 
 if (result && !result.error) {
   return Astro.redirect("/students");
 }
+
+const title = `Kader App | ${student?.name}`;
 ---
 
 <MainLayout title={title}>
+  {
+    result?.error && (
+      <p class="text-red-100">There was an error! {result.error.message}</p>
+    )
+  }
   {
     student && (
       <form
         action={actions.students.update}
         method="post"
-        class="px-6 py-4 grid grid-cols-2 gap-4 max-w-2xl rounded border-2 border-accent-content/20"
+        class="px-6 py-4 grid grid-cols-2 gap-4 max-w-2xl rounded border-2 border-base-content/20"
       >
         <input type="hidden" name="id" value={student.id} />
         <label class="label" for="name">
@@ -44,6 +80,61 @@ if (result && !result.error) {
           id="name"
           value={student.name}
         />
+
+        <label class="label" for="nickname">
+          Nickname
+        </label>
+        <input
+          type="text"
+          class="input"
+          name="nickname"
+          id="nickname"
+          placeholder="nickname"
+        />
+
+        <label class="label" for="blood_type">
+          Blood types
+        </label>
+
+        <select class="select" name="blood_type" id="blood_type">
+          <option value={null} selected={student.blood_type === null}>
+            None
+          </option>
+
+          {bloodTypes.map((type) => (
+            <option
+              value={type.name}
+              selected={student.blood_type === type.name}
+            >
+              {type.name}
+            </option>
+          ))}
+        </select>
+
+        <label class="label">Place, date of birth</label>
+        <input
+          type="text"
+          class="input"
+          disabled
+          value={student.place_of_birth}
+        />
+
+        <label for="date_of_birth" class="label">
+          Actual date of birth
+        </label>
+
+        <input
+          type="date"
+          class="input"
+          name="date_of_birth"
+          id="date_of_birth"
+          value={formattedDob}
+        />
+
+        <label for="address" class="label">
+          Address
+        </label>
+        <input type="text" class="input" name="address" id="address" />
 
         <label class="label" for="group_id">
           Group
