@@ -78,14 +78,13 @@ const groups = await newGroupRepo().getGroups();
             <th> No. </th>
             <th> NIM </th>
             <th> Name </th>
-            <th> Nickame </th>
             <th> Place and date of birth </th>
-            <th> Group </th>
-            <th> Hobby </th>
-            <th> date of birth </th>
             <th> instagram handle </th>
+            <th> Hobby </th>
             <th> blood type </th>
             <th> address </th>
+            <th> Group </th>
+            <th> date of birth </th>
             <th> has bonded with? </th>
           </tr>
         </thead>
@@ -103,11 +102,9 @@ const groups = await newGroupRepo().getGroups();
               <td>{i + 1}</td>
               <td>{s.nim}</td>
               <td>
-                <a
-                  class="link link-hover px-4 py-2 block"
-                  href={`/students/${s.id}`}
-                >
+                <a class="link link-hover block" href={`/students/${s.id}`}>
                   {s.name}
+                  {s.nickname && <span>({s.nickname})</span>}
                 </a>
                 {s.image_filename && (
                   <img
@@ -118,11 +115,7 @@ const groups = await newGroupRepo().getGroups();
                   />
                 )}
               </td>
-              <td>{s.nickname}</td>
               <td>{s.place_of_birth}</td>
-              <td>{s.group_name}</td>
-              <td class="max-w-48">{s.hobby}</td>
-              <td>{new Date(s.date_of_birth).toLocaleDateString()}</td>
               <td>
                 <a
                   class="link"
@@ -131,8 +124,11 @@ const groups = await newGroupRepo().getGroups();
                   {s.instagram_handle}
                 </a>
               </td>
+              <td class="max-w-48">{s.hobby}</td>
               <td>{s.blood_type}</td>
               <td class="max-w-96">{s.address}</td>
+              <td>{s.group_name}</td>
+              <td>{new Date(s.date_of_birth ?? "").toLocaleDateString()}</td>
               <td>{s.has_bonded_with === 0 ? "x" : "v"}</td>
             </tr>
           ))

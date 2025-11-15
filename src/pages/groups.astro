@@ -22,7 +22,17 @@ const groups = await newGroupRepo().getVerboseGroups();
           ]}
         >
           <article>
-            <h2 class="text-xl">{group.name}</h2>
+            <h2 class="text-xl">
+              <a
+                class:list={[
+                  "link-hover",
+                  { "link-success": group.percentage === 100 },
+                ]}
+                href={`/students/?group=${group.name}`}
+              >
+                {group.name}
+              </a>
+            </h2>
             (bonded with {group.bonded_count} out of {group.student_count},{" "}
             {group.percentage}% progress)
           </article>

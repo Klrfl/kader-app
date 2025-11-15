@@ -57,8 +57,8 @@ class SQLiteStudentRepository implements StudentRepository {
         "s.address",
         "i.filename as image_filename",
         "g.name as group_name",
-      ]);
-
+      ])
+      .orderBy("s.nim", "asc");
     if (q) {
       dbQuery = dbQuery.where((eb) =>
         eb.or([
