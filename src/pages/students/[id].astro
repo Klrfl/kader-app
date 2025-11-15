@@ -15,6 +15,7 @@ const student = await db
     "id",
     "group_id",
     "name",
+    "nickname",
     "date_of_birth",
     "place_of_birth",
     "instagram_handle",
@@ -41,7 +42,7 @@ const bloodTypes = [
   { name: "AB+" },
 ] as const;
 
-const dob = new Date(student?.date_of_birth);
+const dob = new Date(student?.date_of_birth ?? "");
 const year = dob.getFullYear();
 const month = dob.getMonth();
 const date = dob.getDate();
@@ -63,7 +64,7 @@ const title = `Kader App | ${student?.name}`;
     )
   }
   {
-    student && (
+    student ? (
       <form
         action={actions.students.update}
         method="post"
@@ -89,6 +90,7 @@ const title = `Kader App | ${student?.name}`;
           class="input"
           name="nickname"
           id="nickname"
+          value={student.nickname}
           placeholder="nickname"
         />
 
@@ -167,6 +169,17 @@ const title = `Kader App | ${student?.name}`;
           submit
         </button>
       </form>
+    ) : (
+      <article class="grid place-content-center text-center min-h-[60vh]">
+        <h1 class="text-xl">No student found.</h1>
+        <p>
+          You may have followed a faulty link or manually entered a nonexistent
+          student ID.
+        </p>
+        <a class="btn btn-primary my-4" href="/students">
+          Go back to the students page
+        </a>
+      </article>
     )
   }
 </MainLayout>
