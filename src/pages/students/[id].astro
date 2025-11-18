@@ -4,6 +4,7 @@ import MainLayout from "@/layouts/MainLayout.astro";
 
 import { actions } from "astro:actions";
 import { newGroupRepo } from "@/repositories/groups";
+import { isInputError } from "astro:actions";
 
 const { id } = Astro.params;
 if (!id || Number.isNaN(Number(id))) throw new Error("no id");
@@ -49,6 +50,7 @@ const date = dob.getDate();
 const formattedDob = `${year}-${month}-${date}`;
 
 const result = Astro.getActionResult(actions.students.update);
+const inputErrors = isInputError(result?.error) ? result.error.fields : {};
 
 if (result && !result.error) {
   return Astro.redirect("/students");
@@ -60,7 +62,19 @@ const title = `Kader App | ${student?.name}`;
 <MainLayout title={title}>
   {
     result?.error && (
-      <p class="text-red-100">There was an error! {result.error.message}</p>
+      <header class="py-6 px-8 bg-red-700/25 outline-1 outline-red-500">
+        <p>There was an error!</p>
+
+        {result.error.code === "BAD_REQUEST" && (
+          <p>Please check your inputs.</p>
+        )}
+
+        {Object.entries(inputErrors).map(([key, value]) => (
+          <p>
+            {key} - {value}
+          </p>
+        ))}
+      </header>
     )
   }
   {
@@ -69,7 +83,11 @@ const title = `Kader App | ${student?.name}`;
         action={actions.students.update}
         method="post"
         class="px-6 py-4 grid grid-cols-2 gap-4 max-w-2xl rounded border-2 border-base-content/20"
+        enctype="multipart/form-data"
       >
+        <label for="image">Image</label>
+        <input type="file" name="image" id="image" accept="image/*" />
+
         <input type="hidden" name="id" value={student.id} />
         <label class="label" for="name">
           Name
