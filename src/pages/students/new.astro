@@ -1,15 +1,23 @@
 ---
 import MainLayout from "@/layouts/MainLayout.astro";
 import { newGroupRepo } from "@/repositories/groups";
+import { actions } from "astro:actions";
 
 const groups = await newGroupRepo().getGroups();
+
+const response = Astro.getActionResult(actions.students.create);
+console.log(response);
+
+if (response && !response.error) {
+  return Astro.redirect("/students");
+}
 ---
 
 <MainLayout>
   <h1 class="text-xl font-bold">Add new student</h1>
 
   <form
-    action=""
+    action={actions.students.create}
     method="POST"
     class="grid grid-cols-[1fr_2fr_1fr_2fr] gap-y-4 gap-x-8 rounded border-2 border-base-content/20 px-6 py-4"
     enctype="multipart/form-data"

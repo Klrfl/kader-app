@@ -1,5 +1,7 @@
 import { db } from "@/database";
 import type { DB, Students } from "@/database/database.types";
+import { AppError } from "@/errors";
+import type { Student } from "@/types";
 import { sql, type Kysely } from "kysely";
 import type { Selectable } from "kysely";
 
@@ -14,11 +16,26 @@ type getVerboseStudentsParams = {
   groupName?: string | null;
 };
 
+type CreateStudentParams = Pick<
+  Students,
+  | "name"
+  | "nickname"
+  | "nim"
+  | "address"
+  | "blood_type"
+  | "date_of_birth"
+  | "place_of_birth"
+  | "group_id"
+  | "instagram_handle"
+  | "hobby"
+>;
+
 interface StudentRepository {
-  getStudents(): Promise<Selectable<Students>[]>;
+  getStudents(): Promise<Student[]>;
   getVerboseStudents(
     params: getVerboseStudentsParams
   ): Promise<VerboseStudent[]>;
+  createStudent(p: CreateStudentParams): Promise<Student>;
 }
 
 class SQLiteStudentRepository implements StudentRepository {
@@ -27,7 +44,6 @@ class SQLiteStudentRepository implements StudentRepository {
   constructor(db: Kysely<DB>) {
     this.db = db;
   }
-
   async getStudents(): Promise<Selectable<Students>[]> {
     const students = await this.db.selectFrom("students").selectAll().execute();
     return students;
@@ -78,6 +94,27 @@ class SQLiteStudentRepository implements StudentRepository {
 
     const students = await dbQuery.execute();
     return students;
+  }
+
+  async createStudent(input: CreateStudentParams): Promise<Student> {
+    const parsed_dob = input.date_of_birth
+      ? new Date(input.date_of_birth).toISOString()
+      : null;
+
+    const results = await db
+      .insertInto("students")
+      .values({ ...input, date_of_birth: parsed_dob })
+      .returningAll()
+      .executeTakeFirst();
+
+    if (!results) {
+      throw new AppError(
+        "Error when inserting new student ",
+        "STUDENT_INSERT_ERROR"
+      );
+    }
+
+    return results;
   }
 }
 

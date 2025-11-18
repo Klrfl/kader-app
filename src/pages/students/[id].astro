@@ -52,6 +52,8 @@ const formattedDob = `${year}-${month}-${date}`;
 const result = Astro.getActionResult(actions.students.update);
 const inputErrors = isInputError(result?.error) ? result.error.fields : {};
 
+console.log(result);
+
 if (result && !result.error) {
   return Astro.redirect("/students");
 }
@@ -79,114 +81,128 @@ const title = `Kader App | ${student?.name}`;
   }
   {
     student ? (
-      <form
-        action={actions.students.update}
-        method="post"
-        class="px-6 py-4 grid grid-cols-2 gap-4 max-w-2xl rounded border-2 border-base-content/20"
-        enctype="multipart/form-data"
-      >
-        <label for="image">Image</label>
-        <input type="file" name="image" id="image" accept="image/*" />
-
-        <input type="hidden" name="id" value={student.id} />
-        <label class="label" for="name">
-          Name
-        </label>
-        <input
-          class="input"
-          type="text"
-          name="name"
-          id="name"
-          value={student.name}
-        />
-
-        <label class="label" for="nickname">
-          Nickname
-        </label>
-        <input
-          type="text"
-          class="input"
-          name="nickname"
-          id="nickname"
-          value={student.nickname}
-          placeholder="nickname"
-        />
-
-        <label class="label" for="blood_type">
-          Blood types
-        </label>
-
-        <select class="select" name="blood_type" id="blood_type">
-          <option value={null} selected={student.blood_type === null}>
-            None
-          </option>
-
-          {bloodTypes.map((type) => (
-            <option
-              value={type.name}
-              selected={student.blood_type === type.name}
-            >
-              {type.name}
-            </option>
-          ))}
-        </select>
-
-        <label class="label">Place, date of birth</label>
-        <input
-          type="text"
-          class="input"
-          disabled
-          value={student.place_of_birth}
-        />
-
-        <label for="date_of_birth" class="label">
-          Actual date of birth
-        </label>
-
-        <input
-          type="date"
-          class="input"
-          name="date_of_birth"
-          id="date_of_birth"
-          value={formattedDob}
-        />
-
-        <label for="address" class="label">
-          Address
-        </label>
-        <input type="text" class="input" name="address" id="address" />
-
-        <label class="label" for="group_id">
-          Group
-        </label>
-        <select class="select" name="group_id" id="group_id">
-          {groups.map((group) => (
-            <option selected={group.id === student.group_id} value={group.id}>
-              {group.name}
-            </option>
-          ))}
-        </select>
-
-        <label class="label" for="has_bonded_with">
-          Has bonded with?
-        </label>
-
-        <input
-          class="checkbox"
-          type="checkbox"
-          checked={Boolean(student.has_bonded_with)}
-          name="has_bonded_with"
-          id="has_bonded_with"
-        />
-
-        <button
-          class="btn btn-primary"
-          type="submit"
-          class="col-span-2 self-end"
+      <>
+        <form
+          action={actions.students.update}
+          method="post"
+          class="px-6 py-4 grid grid-cols-2 gap-4 max-w-2xl rounded border-2 border-base-content/20"
+          enctype="multipart/form-data"
         >
-          submit
-        </button>
-      </form>
+          <label for="image">Image</label>
+          <input type="file" name="image" id="image" accept="image/*" />
+
+          <input type="hidden" name="id" value={student.id} />
+          <label class="label" for="name">
+            Name
+          </label>
+          <input
+            class="input"
+            type="text"
+            name="name"
+            id="name"
+            value={student.name}
+          />
+
+          <label class="label" for="nickname">
+            Nickname
+          </label>
+          <input
+            type="text"
+            class="input"
+            name="nickname"
+            id="nickname"
+            value={student.nickname}
+            placeholder="nickname"
+          />
+
+          <label class="label" for="blood_type">
+            Blood types
+          </label>
+
+          <select class="select" name="blood_type" id="blood_type">
+            <option value={null} selected={student.blood_type === null}>
+              None
+            </option>
+
+            {bloodTypes.map((type) => (
+              <option
+                value={type.name}
+                selected={student.blood_type === type.name}
+              >
+                {type.name}
+              </option>
+            ))}
+          </select>
+
+          <label class="label">Place, date of birth</label>
+          <input
+            type="text"
+            class="input"
+            disabled
+            value={student.place_of_birth}
+          />
+
+          <label for="date_of_birth" class="label">
+            Actual date of birth
+          </label>
+
+          <input
+            type="date"
+            class="input"
+            name="date_of_birth"
+            id="date_of_birth"
+            value={formattedDob}
+          />
+
+          <label for="address" class="label">
+            Address
+          </label>
+          <input type="text" class="input" name="address" id="address" />
+
+          <label class="label" for="group_id">
+            Group
+          </label>
+          <select class="select" name="group_id" id="group_id">
+            {groups.map((group) => (
+              <option selected={group.id === student.group_id} value={group.id}>
+                {group.name}
+              </option>
+            ))}
+          </select>
+
+          <label class="label" for="has_bonded_with">
+            Has bonded with?
+          </label>
+
+          <input
+            class="checkbox"
+            type="checkbox"
+            checked={Boolean(student.has_bonded_with)}
+            name="has_bonded_with"
+            id="has_bonded_with"
+          />
+
+          <button
+            class="btn btn-primary"
+            type="submit"
+            class="col-span-2 self-end"
+          >
+            submit
+          </button>
+        </form>
+
+        <form
+          class="rounded border-2 border-base-content/20"
+          action={actions.students.delete}
+          method="POST"
+        >
+          <h2>Delete student</h2>
+          <input type="hidden" name="id" value={student.id} />
+          <button class="btn btn-error btn-soft" type="submit">
+            Delete
+          </button>
+        </form>
+      </>
     ) : (
       <article class="grid place-content-center text-center min-h-[60vh]">
         <h1 class="text-xl">No student found.</h1>
