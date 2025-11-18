@@ -26,7 +26,14 @@ const groups = await newGroupRepo().getGroups();
 <MainLayout>
   <div class="grid grid-cols-6 gap-6">
     <header class="py-4 col-span-2">
-      <h1 class="text-xl"><span class="italic">{groupName}</span> Students</h1>
+      <div class="flex justify-between items-center">
+        <h1 class="text-xl">
+          <span class="italic">{groupName}</span> Students
+        </h1>
+
+        <a class="btn btn-primary" href="/students/new">New student</a>
+      </div>
+
       <p>
         {bondedWithCount}/{studentsCount}
         <span class="font-bold"
@@ -65,7 +72,7 @@ const groups = await newGroupRepo().getGroups();
           id="nim"
           value={nim}
         />
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="btn btn-primary">Search</button>
       </form>
     </header>
 

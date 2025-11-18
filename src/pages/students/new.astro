@@ -1,0 +1,108 @@
+---
+import MainLayout from "@/layouts/MainLayout.astro";
+import { newGroupRepo } from "@/repositories/groups";
+
+const groups = await newGroupRepo().getGroups();
+---
+
+<MainLayout>
+  <h1 class="text-xl font-bold">Add new student</h1>
+
+  <form
+    action=""
+    method="POST"
+    class="grid grid-cols-[1fr_2fr_1fr_2fr] gap-y-4 gap-x-8 rounded border-2 border-base-content/20 px-6 py-4"
+    enctype="multipart/form-data"
+  >
+    <label class="label" for="name">Name</label>
+    <input
+      class="input"
+      type="text"
+      name="name"
+      id="name"
+      placeholder="student name"
+      required
+    />
+
+    <label class="label" for="nickname">Nickname</label>
+    <input
+      class="input"
+      type="text"
+      name="nickname"
+      id="nickname"
+      placeholder="nickname"
+    />
+
+    <label class="label" for="date_of_birth"> Date of Birth </label>
+    <input class="input" type="date" name="date_of_birth" id="date_of_birth" />
+
+    <label class="label" for="nim">9-digit NIM</label>
+    <input
+      class="input"
+      type="number"
+      inputmode="numeric"
+      name="nim"
+      id="nim"
+      placeholder="........."
+    />
+
+    <label class="label" for="place_of_birth">Place of Birth</label>
+    <input
+      class="input"
+      type="text"
+      name="place_of_birth"
+      id="place_of_birth"
+      placeholder="place of birth"
+    />
+
+    <label class="label" for="group_id">Group</label>
+    <select class="select" name="group_id" id="group_id">
+      {groups.map((g) => <option value={g.id}>{g.name}</option>)}
+    </select>
+
+    <label class="label" for="instagram_handle">Instagram handle</label>
+    <input
+      class="input"
+      type="text"
+      name="instagram_handle"
+      placeholder="instagram handle (without the @)"
+    />
+
+    <label class="label" for="blood_type">Blood Type</label>
+    <input
+      class="input"
+      type="text"
+      name="blood_type"
+      placeholder="blood type"
+    />
+    <label class="label" for="address">Address</label>
+    <input
+      class="input"
+      name="address"
+      id="address"
+      type="text"
+      placeholder="address"
+    />
+    <label class="label" for="hobby">Hobby</label>
+    <input
+      class="input"
+      type="text"
+      name="hobby"
+      id="hobby"
+      placeholder="hobby"
+    />
+
+    <label class="label" for="image">image</label>
+    <input
+      class="input file-input"
+      type="file"
+      name="image"
+      id="image"
+      placeholder="bonding image"
+    />
+
+    <button class="btn btn-primary col-end-[-1]" type="submit"
+      >Add new student</button
+    >
+  </form>
+</MainLayout>
