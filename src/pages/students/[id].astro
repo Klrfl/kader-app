@@ -17,6 +17,7 @@ const student = await db
   .select([
     "students.id",
     "students.group_id",
+    "students.nim",
     "students.name",
     "students.nickname",
     "students.date_of_birth",
@@ -84,6 +85,13 @@ const title = `Kader App | ${student?.name}`;
   {
     student ? (
       <div class="grid grid-cols-2 gap-4">
+        <header class="col-span-2">
+          Editing
+          <h1 class="text-2xl">
+            {student.name} - {student.nim}
+          </h1>
+        </header>
+
         <form
           action={actions.students.update}
           method="post"
@@ -194,6 +202,8 @@ const title = `Kader App | ${student?.name}`;
         </form>
 
         <Image
+          class="border-2 border-base-content/20 rounded"
+          id="student-image"
           width={300}
           height={400}
           src={`/images/${student.image_filename}`}
@@ -226,3 +236,12 @@ const title = `Kader App | ${student?.name}`;
     )
   }
 </MainLayout>
+
+<script>
+  const studentImageEl = document.getElementById("student-image");
+  const studentForm: HTMLFormElement | null = document.getElementById("image");
+
+  studentForm?.addEventListener("change", (e) => {
+    console.log(e.files[0]);
+  });
+</script>
