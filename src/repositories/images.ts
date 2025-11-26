@@ -66,14 +66,15 @@ export class SQLiteImageRepo implements ImageRepository {
 
     console.log("successfully written file to ", absFilename);
 
-    const imageResult = await this.db
-      .updateTable("images")
-      .set({ filename: filename, student_id: student_id })
-      .where("student_id", "=", student_id)
+    const insertImageResult = await this.db
+      .insertInto("images")
+      .values({ student_id: student_id, filename: filename })
       .returningAll()
       .executeTakeFirst();
 
-    if (!imageResult) {
+    console.trace(insertImageResult);
+
+    if (!insertImageResult) {
       const error = new ActionError({
         message: "failed to upload image.",
         code: "INTERNAL_SERVER_ERROR",
@@ -82,7 +83,7 @@ export class SQLiteImageRepo implements ImageRepository {
       return { result: null, error };
     }
 
-    return { result: imageResult, error: null };
+    return { result: insertImageResult, error: null };
   }
 }
 

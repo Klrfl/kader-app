@@ -52,8 +52,6 @@ const formattedDob = `${year.padStart(2, "0")}-${month.padStart(2, "0")}-${date.
 const result = Astro.getActionResult(actions.students.update);
 const inputErrors = isInputError(result?.error) ? result.error.fields : {};
 
-console.log(result);
-
 if (result && !result.error) {
   return Astro.redirect("/students");
 }

@@ -27,49 +27,52 @@ export const studentUpdate = defineAction({
       ? new Date(input.date_of_birth).toISOString()
       : null;
 
-    const result = await db.transaction().execute(async (tx) => {
-      const [student] = await tx
-        .updateTable("students")
-        .set({
-          id: input.id,
-          name: input.name,
-          nickname: input.nickname,
-          nim: input.nim,
-          blood_type: input.blood_type,
-          group_id: input.group_id,
-          address: input.address,
-          date_of_birth: sql`datetime(${parsed_dob})`,
-          has_bonded_with: Number(input.has_bonded_with),
-        })
-        .where("id", "=", input.id)
-        .returningAll()
-        .execute();
+    const student = await db
+      .updateTable("students")
+      .set({
+        id: input.id,
+        name: input.name,
+        nickname: input.nickname,
+        nim: input.nim,
+        blood_type: input.blood_type,
+        group_id: input.group_id,
+        address: input.address,
+        date_of_birth: sql`datetime(${parsed_dob})`,
+        has_bonded_with: Number(input.has_bonded_with),
+      })
+      .where("id", "=", input.id)
+      .returningAll()
+      .executeTakeFirst();
 
-      if (input.image && input.image.size > 0) {
-        const group = await tx
-          .selectFrom("groups")
-          .select(["name"])
-          .where("id", "=", input.group_id)
-          .executeTakeFirstOrThrow();
+    if (!student) {
+      throw new ActionError({
+        message: "failed to update student",
+        code: "INTERNAL_SERVER_ERROR",
+      });
+    }
 
-        const trimmedNim = student.nim!.slice(student.nim!.length - 3);
-        const [_, ext] = input.image.type.split("/");
-        const filename = `${group.name}.${trimmedNim}-${input.nickname}.${ext}`;
+    if (input.image && input.image.size > 0) {
+      const group = await db
+        .selectFrom("groups")
+        .select(["name"])
+        .where("id", "=", input.group_id)
+        .executeTakeFirstOrThrow();
 
-        const imageRepo = newImageRepo();
-        const { error } = await imageRepo.uploadStudentImage(
-          input.image,
-          filename,
-          student.id
-        );
+      const trimmedNim = student.nim!.slice(student.nim!.length - 3);
+      const [_, ext] = input.image.type.split("/");
+      const filename = `${group.name}.${trimmedNim}-${input.nickname}.${ext}`;
 
-        if (error) throw error;
+      const imageRepo = newImageRepo();
+      const { error } = await imageRepo.uploadStudentImage(
+        input.image,
+        filename,
+        student.id
+      );
 
-        return student;
-      }
-    });
+      if (error) throw error;
+    }
 
-    return result;
+    return student;
   },
 });
 
