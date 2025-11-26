@@ -1,12 +1,7 @@
-import type { Students } from "@/database/database.types";
+import type { Images, Students } from "@/database/database.types";
 import type { Selectable } from "kysely";
 
-export interface Image {
-  created_at: string | null;
-  filename: string | null;
-  id: number;
-  student_id: number;
-}
+export type Image = Selectable<Images>;
 
 export interface Group {
   id: number;

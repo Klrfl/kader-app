@@ -1,11 +1,10 @@
 import { db } from "@/database";
 import type { Students } from "@/database/database.types";
+import { newImageRepo } from "@/repositories/images";
+import { ActionError } from "astro/actions/runtime/shared.js";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import { sql, type Insertable } from "kysely";
-import fs from "node:fs/promises";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 export const studentUpdate = defineAction({
   accept: "form",
@@ -20,7 +19,7 @@ export const studentUpdate = defineAction({
     group_id: z.number().int().positive(),
     has_bonded_with: z.boolean(),
     address: z.string().optional(),
-    image: z.instanceof(File).optional(),
+    image: z.instanceof(File).optional().nullable(),
   }),
   handler: async (input) => {
     // TODO: handle errors
@@ -46,36 +45,28 @@ export const studentUpdate = defineAction({
         .returningAll()
         .execute();
 
-      if (input.image) {
+      if (input.image && input.image.size > 0) {
         const group = await tx
           .selectFrom("groups")
           .select(["name"])
           .where("id", "=", input.group_id)
           .executeTakeFirstOrThrow();
 
-        const wd = path.dirname(fileURLToPath(import.meta.url));
-        const imagesBase = path.join(wd, "../../public/images/");
-
-        const buf = Buffer.from(await input.image.arrayBuffer());
-
         const trimmedNim = student.nim!.slice(student.nim!.length - 3);
         const [_, ext] = input.image.type.split("/");
         const filename = `${group.name}.${trimmedNim}-${input.nickname}.${ext}`;
 
-        const absFilename = path.join(imagesBase, filename);
+        const imageRepo = newImageRepo();
+        const { error } = await imageRepo.uploadStudentImage(
+          input.image,
+          filename,
+          student.id
+        );
 
-        await fs.writeFile(absFilename, buf);
+        if (error) throw error;
 
-        console.log("successfully written file to ", absFilename);
-
-        const imageResult = await tx
-          .updateTable("images")
-          .set({ filename: filename, student_id: student.id })
-          .where("student_id", "=", student.id)
-          .execute();
+        return student;
       }
-
-      return student;
     });
 
     return result;
