@@ -98,8 +98,16 @@ const title = `Kader App | ${student?.name}`;
           class="px-6 py-4 grid grid-cols-2 gap-4 max-w-2xl rounded border-2 border-base-content/20"
           enctype="multipart/form-data"
         >
-          <label for="image">Image</label>
-          <input type="file" name="image" id="image" accept="image/*" />
+          <label class="label" for="image">
+            Image
+          </label>
+          <input
+            type="file"
+            name="image"
+            id="image"
+            accept="image/*"
+            class="file-input"
+          />
 
           <input type="hidden" name="id" value={student.id} />
           <label class="label" for="name">

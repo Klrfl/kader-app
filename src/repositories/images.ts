@@ -73,8 +73,6 @@ export class SQLiteImageRepo implements ImageRepository {
       .returningAll()
       .executeTakeFirst();
 
-    console.trace(insertImageResult);
-
     if (!insertImageResult) {
       const error = new ActionError({
         message: "failed to upload image.",
