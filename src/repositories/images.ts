@@ -59,7 +59,8 @@ export class SQLiteImageRepo implements ImageRepository {
   async uploadStudentImage(file: File, filename: string, student_id: number) {
     const wd = path.dirname(fileURLToPath(import.meta.url));
     const imagesBase = path.join(wd, "../../public/images/");
-    const absFilename = path.join(imagesBase, filename);
+    const normalizedFilename = encodeURIComponent(filename);
+    const absFilename = path.join(imagesBase, normalizedFilename);
 
     const buf = Buffer.from(await file.arrayBuffer());
     await fs.writeFile(absFilename, buf);
@@ -68,7 +69,7 @@ export class SQLiteImageRepo implements ImageRepository {
 
     const insertImageResult = await this.db
       .insertInto("images")
-      .values({ student_id: student_id, filename: filename })
+      .values({ student_id: student_id, filename: normalizedFilename })
       .returningAll()
       .executeTakeFirst();
 

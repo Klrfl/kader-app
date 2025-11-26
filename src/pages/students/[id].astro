@@ -1,29 +1,32 @@
 ---
 import { db } from "@/database";
 import MainLayout from "@/layouts/MainLayout.astro";
+import { Image } from "astro:assets";
 
 import { actions } from "astro:actions";
 import { newGroupRepo } from "@/repositories/groups";
 import { isInputError } from "astro:actions";
 
 const { id } = Astro.params;
-if (!id || Number.isNaN(Number(id))) throw new Error("no id");
+if (!id) throw new Error("no id");
 
 const student = await db
   .selectFrom("students")
-  .where("id", "=", Number(id))
+  .leftJoin("images", "images.student_id", "students.id")
+  .where("students.id", "=", Number(id))
   .select([
-    "id",
-    "group_id",
-    "name",
-    "nickname",
-    "date_of_birth",
-    "place_of_birth",
-    "instagram_handle",
-    "hobby",
-    "blood_type",
-    "address",
-    "has_bonded_with",
+    "students.id",
+    "students.group_id",
+    "students.name",
+    "students.nickname",
+    "students.date_of_birth",
+    "students.place_of_birth",
+    "students.instagram_handle",
+    "students.hobby",
+    "students.blood_type",
+    "students.address",
+    "students.has_bonded_with",
+    "images.filename as image_filename",
   ])
   .executeTakeFirst();
 
@@ -52,8 +55,9 @@ const formattedDob = `${year.padStart(2, "0")}-${month.padStart(2, "0")}-${date.
 const result = Astro.getActionResult(actions.students.update);
 const inputErrors = isInputError(result?.error) ? result.error.fields : {};
 
-if (result && !result.error) {
-  return Astro.redirect("/students");
+if (result) {
+  if (result.error) console.error(result.error);
+  if (!result.error) return Astro.redirect("/students");
 }
 
 const title = `Kader App | ${student?.name}`;
@@ -79,7 +83,7 @@ const title = `Kader App | ${student?.name}`;
   }
   {
     student ? (
-      <>
+      <div class="grid grid-cols-2 gap-4">
         <form
           action={actions.students.update}
           method="post"
@@ -189,6 +193,13 @@ const title = `Kader App | ${student?.name}`;
           </button>
         </form>
 
+        <Image
+          width={300}
+          height={400}
+          src={`/images/${student.image_filename}`}
+          alt={student.name}
+        />
+
         <form
           class="rounded border-2 border-base-content/20"
           action={actions.students.delete}
@@ -200,7 +211,7 @@ const title = `Kader App | ${student?.name}`;
             Delete
           </button>
         </form>
-      </>
+      </div>
     ) : (
       <article class="grid place-content-center text-center min-h-[60vh]">
         <h1 class="text-xl">No student found.</h1>
