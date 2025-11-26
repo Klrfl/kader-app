@@ -44,10 +44,10 @@ const bloodTypes = [
 ] as const;
 
 const dob = new Date(student?.date_of_birth ?? "");
-const year = dob.getFullYear();
-const month = dob.getMonth();
-const date = dob.getDate();
-const formattedDob = `${year}-${month}-${date}`;
+const year = dob.getFullYear().toString();
+const month = dob.getMonth().toString();
+const date = dob.getDate().toString();
+const formattedDob = `${year.padStart(2, "0")}-${month.padStart(2, "0")}-${date.padStart(2, "0")}`;
 
 const result = Astro.getActionResult(actions.students.update);
 const inputErrors = isInputError(result?.error) ? result.error.fields : {};
