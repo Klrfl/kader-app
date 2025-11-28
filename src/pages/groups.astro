@@ -6,9 +6,11 @@ const groups = await newGroupRepo().getVerboseGroups();
 ---
 
 <MainLayout>
-  <h1>Groups</h1>
+  <header class="py-4">
+    <h1 class="text-2xl">Groups</h1>
+  </header>
 
-  <ul class="grid grid-cols-3 gap-4">
+  <ul class="grid grid-cols-2 lg:grid-cols-3 gap-4">
     {
       groups.map((group) => (
         <li
