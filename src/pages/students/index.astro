@@ -7,6 +7,7 @@ import { formatDate } from "@/utils/index.ts";
 const q = Astro.url.searchParams.get("q") ?? "";
 const nim = Astro.url.searchParams.get("nim") ?? "";
 const groupName = Astro.url.searchParams.get("group") ?? "";
+const currentUrl = Astro.url.pathname + Astro.url.search;
 
 const students = await newStudentRepo().getVerboseStudents({
   query: q,
@@ -110,7 +111,10 @@ const groups = await newGroupRepo().getGroups();
               <td>{i + 1}</td>
               <td>{s.nim}</td>
               <td class="max-w-72">
-                <a class="link link-hover block" href={`/students/${s.id}`}>
+                <a
+                  class="link link-hover block"
+                  href={`/students/${s.id}?redirectTo=${encodeURIComponent(currentUrl.toString())}`}
+                >
                   {s.name}
                   {s.nickname && <span class="block">({s.nickname})</span>}
                 </a>

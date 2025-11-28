@@ -9,7 +9,10 @@ import { sql, type Insertable } from "kysely";
 export const studentUpdate = defineAction({
   accept: "form",
   input: z.object({
+    // hidden fields
     id: z.number().int().positive(),
+    redirectTo: z.string().nullable().optional(),
+
     name: z.string(),
     nickname: z.string().optional(),
     nim: z.string().optional(),
@@ -21,7 +24,7 @@ export const studentUpdate = defineAction({
     address: z.string().optional(),
     image: z.instanceof(File).optional().nullable(),
   }),
-  handler: async (input) => {
+  handler: async (input, context) => {
     // TODO: handle errors
     let parsed_dob = input.date_of_birth
       ? new Date(input.date_of_birth).toISOString()
@@ -72,7 +75,7 @@ export const studentUpdate = defineAction({
       if (error) throw error;
     }
 
-    return student;
+    return { redirectTo: input.redirectTo };
   },
 });
 

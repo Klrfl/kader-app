@@ -55,10 +55,14 @@ const formattedDob = `${year.padStart(2, "0")}-${month.padStart(2, "0")}-${date.
 
 const result = Astro.getActionResult(actions.students.update);
 const inputErrors = isInputError(result?.error) ? result.error.fields : {};
+const redirectTo = Astro.url.searchParams.get("redirectTo");
 
 if (result) {
   if (result.error) console.error(result.error);
-  if (!result.error) return Astro.redirect("/students");
+  if (!result.error) {
+    const { redirectTo } = result.data;
+    return Astro.redirect(decodeURIComponent(redirectTo));
+  }
 }
 
 const title = `Kader App | ${student?.name}`;
@@ -98,6 +102,7 @@ const title = `Kader App | ${student?.name}`;
           class="col-span-full lg:col-span-[auto] px-6 py-4 grid grid-cols-2 gap-4 max-w-2xl rounded border-2 border-base-content/20"
           enctype="multipart/form-data"
         >
+          <input type="hidden" name="redirectTo" value={redirectTo} />
           <label class="label" for="image">
             Image
           </label>
@@ -209,14 +214,16 @@ const title = `Kader App | ${student?.name}`;
           </button>
         </form>
 
-        <Image
-          class="border-2 border-base-content/20 rounded"
-          id="student-image"
-          width={300}
-          height={400}
-          src={`/images/${student.image_filename}`}
-          alt={student.name}
-        />
+        {student.image_filename && (
+          <Image
+            class="border-2 border-base-content/20 rounded"
+            id="student-image"
+            width={300}
+            height={400}
+            src={`/images/${student.image_filename}`}
+            alt={student.name}
+          />
+        )}
 
         <form
           class="rounded border-2 border-base-content/20"
