@@ -50,9 +50,9 @@ class SQLiteGroupRepository implements GroupRepository {
           ])
           .groupBy("g.id")
       )
-      .selectFrom("bonded")
-      .leftJoin("no_bonded", "no_bonded.group_id", "bonded.group_id")
-      .rightJoin("groups as g", "g.id", "bonded.group_id")
+      .selectFrom("groups as g")
+      .leftJoin("no_bonded", "g.id", "no_bonded.group_id")
+      .leftJoin("bonded", "g.id", "bonded.group_id")
       .select(({ fn, lit }) => [
         "g.id",
         "g.name",
@@ -61,7 +61,8 @@ class SQLiteGroupRepository implements GroupRepository {
         sql<number>`coalesce(100 * bonded.bonded_count / no_bonded.total_count, 0)`.as(
           "percentage"
         ),
-      ]);
+      ])
+      .orderBy("g.name", "asc");
 
     const results = await query.execute();
     return results as VerboseGroup[];

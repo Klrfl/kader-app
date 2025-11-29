@@ -36,12 +36,21 @@ export class SQLiteImageRepo implements ImageRepository {
   constructor(db: Kysely<DB>) {
     this.db = db;
   }
+
   async getImages({ groupId = 0, showPrinted }: getImagesParams) {
     let query = this.db
       .selectFrom("images as i")
-      .selectAll()
       .leftJoin("students as s", "s.id", "i.student_id")
       .leftJoin("groups as g", "g.id", "s.group_id")
+      .select([
+        "i.id",
+        "i.student_id",
+        "i.filename",
+        "i.created_at",
+        "i.has_been_printed",
+        "s.nickname as student_name",
+        "g.name as group_name",
+      ])
       .orderBy("s.group_id", "asc")
       .orderBy("s.nim", "asc");
     if (groupId !== 0) {
