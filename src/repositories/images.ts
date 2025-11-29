@@ -41,8 +41,9 @@ export class SQLiteImageRepo implements ImageRepository {
       .selectFrom("images as i")
       .selectAll()
       .leftJoin("students as s", "s.id", "i.student_id")
-      .leftJoin("groups as g", "g.id", "s.group_id");
-
+      .leftJoin("groups as g", "g.id", "s.group_id")
+      .orderBy("s.group_id", "asc")
+      .orderBy("s.nim", "asc");
     if (groupId !== 0) {
       query = query.where("g.id", "=", groupId);
     }
