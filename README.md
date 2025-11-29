@@ -1,6 +1,10 @@
-# buku biru paper generator
+# Kader App
 
-this Astro SSR app generates an html page that contains images laid out in a grid that you can print and cut right away.
+![screenshot of kader app](./public/screenshot.png)
+this Astro SSR app
+
+- keeps track of your bonding progress
+- generates a page that contains your buku biru images laid out in a grid that you can print and cut right away.
 
 All images are placed in the `public/` directory.
 
