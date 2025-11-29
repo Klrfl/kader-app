@@ -23,9 +23,9 @@ const groups = await groupRepo.getGroups();
 <MainLayout title="Kader App | Print">
   {error && error.code === "NO_FOLDER_FOUND" && <p>no folder found</p>}
 
-  <article class="grid gap-4 grid-cols-2">
-    <header class="print:hidden px-6 py-4">
-      <h1>Kader app</h1>
+  <article>
+    <header class="print:hidden">
+      <h1>Print</h1>
       {
         images.length ? (
           <p>Showing {images.length} photos</p>
@@ -69,18 +69,20 @@ const groups = await groupRepo.getGroups();
       <button class="btn" type="submit" class="col-end-3">submit</button>
     </form>
 
-    <ul class="grid gap-y-0.25 photo-grid col-span-full">
+    <ul>
       {
         images?.map((f) => (
-          <li>
+          <li class="w-[3cm] h-[4cm] inline-block relative">
             <Image
               width={300}
               height={400}
               src={`/images/${f.filename}`}
               alt={f.student_id}
-              class="block max-w-full w-[3cm] h-[4cm] object-cover"
+              class="inline-block max-w-full w-[3cm] h-[4cm] object-cover"
             />
-            <p class="print:hidden">{f.filename}</p>
+            <p class="print:hidden text-sm absolute bottom-0 left-0 right-0 bg-black/70">
+              {f.student_name} - {f.group_name}
+            </p>
           </li>
         ))
       }
@@ -89,8 +91,8 @@ const groups = await groupRepo.getGroups();
 </MainLayout>
 
 <style>
-  .photo-grid {
-    grid-template-columns: repeat(auto-fit, 3cm);
+  .photo {
+    margin-block: 0.1rem;
   }
 </style>
 

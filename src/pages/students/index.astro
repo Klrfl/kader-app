@@ -102,6 +102,7 @@ const groups = await newGroupRepo().getGroups();
           students?.map((s, i) => (
             <tr
               class:list={[
+                "hover:outline-2 hover:outline-green-900",
                 {
                   "bg-green-700/20": s.has_bonded_with !== 0,
                   "bg-red-700/15": s.has_bonded_with === 0,
