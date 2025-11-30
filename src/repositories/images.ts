@@ -69,9 +69,7 @@ export class SQLiteImageRepo implements ImageRepository {
   async uploadStudentImage(file: File, filename: string, student_id: number) {
     const wd = path.dirname(fileURLToPath(import.meta.url));
     const imagesBase = path.join(wd, "../../public/images/"); // TODO: don't put the path directly here
-    const normalizedFilename = encodeURIComponent(
-      filename.trim().toLowerCase()
-    );
+    const normalizedFilename = encodeURIComponent(filename);
     const absFilename = path.join(imagesBase, normalizedFilename);
 
     const buf = Buffer.from(await file.arrayBuffer());

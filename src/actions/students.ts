@@ -13,18 +13,18 @@ export const studentUpdate = defineAction({
     id: z.number().int().positive(),
     redirectTo: z.string().nullable().optional(),
 
-    name: z.string(),
-    nickname: z.string().optional(),
+    name: z.string().trim(),
+    nickname: z.string().trim().optional(),
     nim: z.string().optional(),
     blood_type: z.string().optional(),
-    instagram_handle: z.string().optional(),
+    instagram_handle: z.string().trim().optional(),
     date_of_birth: z.coerce.date().optional(),
     group_id: z.number().int().positive(),
     has_bonded_with: z.boolean(),
     address: z.string().optional(),
     image: z.instanceof(File).optional().nullable(),
   }),
-  handler: async (input, context) => {
+  handler: async (input) => {
     // TODO: handle errors
     let parsed_dob = input.date_of_birth
       ? new Date(input.date_of_birth).toISOString()
@@ -68,7 +68,7 @@ export const studentUpdate = defineAction({
       const imageRepo = newImageRepo();
       const { error } = await imageRepo.uploadStudentImage(
         input.image,
-        filename,
+        filename.toLowerCase(),
         student.id
       );
 
