@@ -2,8 +2,7 @@
 import MainLayout from "@/layouts/MainLayout.astro";
 import { Image } from "astro:assets";
 
-import { newImageRepo } from "@/repositories/images";
-import { newGroupRepo } from "@/repositories/groups";
+import { newImageRepo, newGroupRepo } from "@/repositories/";
 
 const searchParams = new URL(Astro.url).searchParams;
 const groupToFilterBy = Number(searchParams.get("group") ?? 0);

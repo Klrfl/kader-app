@@ -1,7 +1,6 @@
 ---
 import MainLayout from "@/layouts/MainLayout.astro";
-import { newGroupRepo } from "@/repositories/groups";
-import { newStudentRepo } from "@/repositories/students";
+import { newGroupRepo, newStudentRepo } from "@/repositories/";
 import { formatDate } from "@/utils/index.ts";
 
 const q = Astro.url.searchParams.get("q") ?? "";

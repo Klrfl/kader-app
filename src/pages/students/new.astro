@@ -1,6 +1,6 @@
 ---
 import MainLayout from "@/layouts/MainLayout.astro";
-import { newGroupRepo } from "@/repositories/groups";
+import { newGroupRepo } from "@/repositories/";
 import { actions } from "astro:actions";
 
 const groups = await newGroupRepo().getGroups();

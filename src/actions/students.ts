@@ -1,6 +1,4 @@
-import { newGroupRepo } from "@/repositories/groups";
-import { newImageRepo } from "@/repositories/images";
-import { newStudentRepo } from "@/repositories/students";
+import { newGroupRepo, newImageRepo, newStudentRepo } from "@/repositories/";
 import type { InsertableStudent, UpdateableStudent } from "@/types";
 import { defineAction, ActionError } from "astro:actions";
 import { z } from "astro:schema";
