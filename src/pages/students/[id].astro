@@ -1,36 +1,14 @@
 ---
-import { db } from "@/database";
 import MainLayout from "@/layouts/MainLayout.astro";
 import { Image } from "astro:assets";
 
-import { actions } from "astro:actions";
-import { newGroupRepo } from "@/repositories/";
-import { isInputError } from "astro:actions";
+import { actions, isInputError } from "astro:actions";
+import { newStudentRepo, newGroupRepo } from "@/repositories/";
 
 const { id } = Astro.params;
-if (!id) throw new Error("no id");
+if (!id || Number.isNaN(Number(id))) throw new Error("no id");
 
-const student = await db
-  .selectFrom("students")
-  .leftJoin("images", "images.student_id", "students.id")
-  .where("students.id", "=", Number(id))
-  .select([
-    "students.id",
-    "students.group_id",
-    "students.nim",
-    "students.name",
-    "students.nickname",
-    "students.date_of_birth",
-    "students.place_of_birth",
-    "students.instagram_handle",
-    "students.hobby",
-    "students.blood_type",
-    "students.address",
-    "students.has_bonded_with",
-    "images.filename as image_filename",
-  ])
-  .executeTakeFirst();
-
+const student = await newStudentRepo().getVerboseStudent(Number(id));
 const groups = await newGroupRepo().getGroups();
 const bloodTypes = [
   { name: "A" },
@@ -92,7 +70,7 @@ const title = `Kader App | ${student?.name}`;
         <header class="col-span-full lg:col-span-2">
           Editing
           <h1 class="text-2xl">
-            {student.name} - {student.nim}
+            {student.name} - {student.nim} ({student.group_name})
           </h1>
         </header>
 

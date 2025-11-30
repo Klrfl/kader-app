@@ -16,6 +16,7 @@ type getVerboseStudentsParams = {
 };
 
 interface StudentRepository {
+  getVerboseStudent(id: number): Promise<VerboseStudent>;
   getStudents(): Promise<Student[]>;
   getVerboseStudents(
     params: getVerboseStudentsParams
@@ -31,6 +32,39 @@ class SQLiteStudentRepository implements StudentRepository {
   constructor(db: Kysely<DB>) {
     this.db = db;
   }
+
+  async getVerboseStudent(id: number): Promise<VerboseStudent> {
+    const student = await db
+      .selectFrom("students as s")
+      .leftJoin("images as i", "i.student_id", "s.id")
+      .leftJoin("groups as g", "g.id", "s.group_id")
+      .where("s.id", "=", Number(id))
+      .select((eb) => [
+        "s.id",
+        "s.group_id",
+        "s.nim",
+        "s.name",
+        "s.nickname",
+        "s.instagram_handle",
+        "s.has_bonded_with",
+        "s.hobby",
+        "s.place_of_birth",
+        eb.fn.coalesce("s.date_of_birth", sql<string>`0`).as("date_of_birth"),
+        "s.blood_type",
+        "s.address",
+
+        "g.name as group_name",
+        "i.filename as image_filename",
+      ])
+      .executeTakeFirst();
+
+    if (!student) {
+      throw new AppError("error when getting student", "STUDENT_SELECT_ERROR");
+    }
+
+    return student;
+  }
+
   async getStudents(): Promise<Student[]> {
     const students = await this.db.selectFrom("students").selectAll().execute();
     return students;
@@ -58,6 +92,7 @@ class SQLiteStudentRepository implements StudentRepository {
         eb.fn.coalesce("s.date_of_birth", sql<string>`0`).as("date_of_birth"),
         "s.blood_type",
         "s.address",
+
         "i.filename as image_filename",
         "g.name as group_name",
       ])
