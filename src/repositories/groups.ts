@@ -1,5 +1,6 @@
 import { db } from "@/database";
 import type { DB } from "@/database/database.types";
+import { AppError } from "@/errors";
 import type { Group } from "@/types";
 import type { Kysely } from "kysely";
 import { sql } from "kysely";
@@ -13,6 +14,7 @@ type VerboseGroup = {
 };
 
 interface GroupRepository {
+  getGroup(id: number): Promise<Group>;
   getGroups(query?: string): Promise<Group[]>;
 
   /**
@@ -66,6 +68,20 @@ class SQLiteGroupRepository implements GroupRepository {
 
     const results = await query.execute();
     return results as VerboseGroup[];
+  }
+
+  async getGroup(id: number): Promise<Group> {
+    const result = await this.db
+      .selectFrom("groups")
+      .selectAll()
+      .where("id", "=", id)
+      .executeTakeFirstOrThrow();
+
+    if (!result) {
+      throw new AppError("error when getting group", "GROUP_SELECT_ERROR");
+    }
+
+    return result;
   }
 
   async getGroups(search?: string): Promise<Group[]> {

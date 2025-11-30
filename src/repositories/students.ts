@@ -1,11 +1,10 @@
 import { db } from "@/database";
-import type { DB, Students } from "@/database/database.types";
+import type { DB } from "@/database/database.types";
+import { sql, type Kysely, type Updateable } from "kysely";
 import { AppError } from "@/errors";
-import type { Student } from "@/types";
-import { sql, type Kysely } from "kysely";
-import type { Selectable } from "kysely";
+import type { InsertableStudent, Student, UpdateableStudent } from "@/types";
 
-type VerboseStudent = Selectable<Students> & {
+type VerboseStudent = Student & {
   image_filename: string | null;
   group_name: string | null;
 };
@@ -16,26 +15,14 @@ type getVerboseStudentsParams = {
   groupName?: string | null;
 };
 
-type CreateStudentParams = Pick<
-  Students,
-  | "name"
-  | "nickname"
-  | "nim"
-  | "address"
-  | "blood_type"
-  | "date_of_birth"
-  | "place_of_birth"
-  | "group_id"
-  | "instagram_handle"
-  | "hobby"
->;
-
 interface StudentRepository {
   getStudents(): Promise<Student[]>;
   getVerboseStudents(
     params: getVerboseStudentsParams
   ): Promise<VerboseStudent[]>;
-  createStudent(p: CreateStudentParams): Promise<Student>;
+  createStudent(p: InsertableStudent): Promise<Student>;
+  updateStudent(id: number, input: UpdateableStudent): Promise<Student>;
+  deleteStudent(id: number): Promise<boolean>;
 }
 
 class SQLiteStudentRepository implements StudentRepository {
@@ -44,7 +31,7 @@ class SQLiteStudentRepository implements StudentRepository {
   constructor(db: Kysely<DB>) {
     this.db = db;
   }
-  async getStudents(): Promise<Selectable<Students>[]> {
+  async getStudents(): Promise<Student[]> {
     const students = await this.db.selectFrom("students").selectAll().execute();
     return students;
   }
@@ -68,7 +55,7 @@ class SQLiteStudentRepository implements StudentRepository {
         "s.has_bonded_with",
         "s.hobby",
         "s.place_of_birth",
-        eb.fn.coalesce<string>("s.date_of_birth", sql`0`).as("date_of_birth"),
+        eb.fn.coalesce("s.date_of_birth", sql<string>`0`).as("date_of_birth"),
         "s.blood_type",
         "s.address",
         "i.filename as image_filename",
@@ -96,7 +83,7 @@ class SQLiteStudentRepository implements StudentRepository {
     return students;
   }
 
-  async createStudent(input: CreateStudentParams): Promise<Student> {
+  async createStudent(input: InsertableStudent): Promise<Student> {
     const parsed_dob = input.date_of_birth
       ? new Date(input.date_of_birth).toISOString()
       : null;
@@ -115,6 +102,40 @@ class SQLiteStudentRepository implements StudentRepository {
     }
 
     return results;
+  }
+
+  async updateStudent(id: number, input: UpdateableStudent): Promise<Student> {
+    const student = await db
+      .updateTable("students")
+      .set({
+        name: input.name,
+        nickname: input.nickname,
+        nim: input.nim,
+        blood_type: input.blood_type,
+        group_id: input.group_id,
+        address: input.address,
+        date_of_birth: sql`datetime(${input.date_of_birth})`,
+        has_bonded_with: Number(input.has_bonded_with),
+      })
+      .where("id", "=", id)
+      .returningAll()
+      .executeTakeFirst();
+
+    if (!student) {
+      throw new AppError("error when updating student", "STUDENT_UPDATE_ERROR");
+    }
+
+    return student;
+  }
+
+  async deleteStudent(id: number): Promise<boolean> {
+    const result = await db
+      .deleteFrom("students")
+      .where("id", "=", id)
+      .executeTakeFirst();
+
+    const success = Number(result.numDeletedRows) === 0;
+    return success;
   }
 }
 

@@ -1,10 +1,9 @@
-import { db } from "@/database";
-import type { Students } from "@/database/database.types";
+import { newGroupRepo } from "@/repositories/groups";
 import { newImageRepo } from "@/repositories/images";
-import { ActionError } from "astro/actions/runtime/shared.js";
-import { defineAction } from "astro:actions";
+import { newStudentRepo } from "@/repositories/students";
+import type { InsertableStudent, UpdateableStudent } from "@/types";
+import { defineAction, ActionError } from "astro:actions";
 import { z } from "astro:schema";
-import { sql, type Insertable } from "kysely";
 
 export const studentUpdate = defineAction({
   accept: "form",
@@ -30,22 +29,19 @@ export const studentUpdate = defineAction({
       ? new Date(input.date_of_birth).toISOString()
       : null;
 
-    const student = await db
-      .updateTable("students")
-      .set({
-        id: input.id,
-        name: input.name,
-        nickname: input.nickname,
-        nim: input.nim,
-        blood_type: input.blood_type,
-        group_id: input.group_id,
-        address: input.address,
-        date_of_birth: sql`datetime(${parsed_dob})`,
-        has_bonded_with: Number(input.has_bonded_with),
-      })
-      .where("id", "=", input.id)
-      .returningAll()
-      .executeTakeFirst();
+    const student_data: UpdateableStudent = {
+      name: input.name,
+      nickname: input.nickname,
+      nim: input.nim,
+      blood_type: input.blood_type,
+      group_id: input.group_id,
+      address: input.address,
+      date_of_birth: parsed_dob,
+      has_bonded_with: Number(input.has_bonded_with),
+    };
+
+    const studentRepo = newStudentRepo();
+    const student = await studentRepo.updateStudent(input.id, student_data);
 
     if (!student) {
       throw new ActionError({
@@ -55,13 +51,13 @@ export const studentUpdate = defineAction({
     }
 
     if (input.image && input.image.size > 0) {
-      const group = await db
-        .selectFrom("groups")
-        .select(["name"])
-        .where("id", "=", input.group_id)
-        .executeTakeFirstOrThrow();
+      const groupRepo = newGroupRepo();
+      const group = await groupRepo.getGroup(input.group_id);
 
-      const trimmedNim = student.nim!.slice(student.nim!.length - 3);
+      const trimmedNim = student.nim
+        ? student.nim.slice(student.nim!.length - 3)
+        : "xxx";
+
       const [_, ext] = input.image.type.split("/");
       const filename = `${group.name}.${trimmedNim}-${input.nickname}.${ext}`;
 
@@ -99,8 +95,7 @@ export const studentCreate = defineAction({
       ? new Date(input.date_of_birth).toISOString()
       : null;
 
-    // TODO: abstract this type
-    const student_data: Insertable<Students> = {
+    const student_data: InsertableStudent = {
       name: input.name,
       nickname: input.nickname,
       nim: input.nim,
@@ -112,13 +107,10 @@ export const studentCreate = defineAction({
       place_of_birth: input.place_of_birth,
     };
 
-    const results = await db
-      .insertInto("students")
-      .values(student_data)
-      .returningAll()
-      .executeTakeFirst();
+    const studentRepo = newStudentRepo();
+    const results = studentRepo.createStudent(student_data);
 
-    console.log(results);
+    return results;
   },
 });
 
@@ -126,11 +118,8 @@ export const studentDelete = defineAction({
   accept: "form",
   input: z.object({ id: z.number().positive() }),
   handler: async ({ id }) => {
-    const result = await db
-      .deleteFrom("students")
-      .where("id", "=", id)
-      .executeTakeFirst();
-    const success = Number(result.numDeletedRows) === 0;
+    const studentRepo = newStudentRepo();
+    const success = studentRepo.deleteStudent(id);
 
     return { success };
   },
