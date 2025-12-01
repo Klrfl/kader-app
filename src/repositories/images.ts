@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { UPLOAD_BASE } from "astro:env/server";
 import { db } from "@/database";
 import type { DB } from "@/database/database.types";
 import type { Image } from "@/types";
@@ -32,9 +32,13 @@ interface ImageRepository {
 }
 
 export class SQLiteImageRepo implements ImageRepository {
+  private UPLOAD_BASE: string;
   private db: Kysely<DB>;
+
   constructor(db: Kysely<DB>) {
     this.db = db;
+
+    this.UPLOAD_BASE = UPLOAD_BASE;
   }
 
   async getImages({ groupId = 0, showPrinted }: getImagesParams) {
@@ -67,10 +71,9 @@ export class SQLiteImageRepo implements ImageRepository {
   }
 
   async uploadStudentImage(file: File, filename: string, student_id: number) {
-    const wd = path.dirname(fileURLToPath(import.meta.url));
-    const imagesBase = path.join(wd, "../../public/images/"); // TODO: don't put the path directly here
+    const uploadBase = this.UPLOAD_BASE;
     const normalizedFilename = encodeURIComponent(filename);
-    const absFilename = path.join(imagesBase, normalizedFilename);
+    const absFilename = path.join(uploadBase, normalizedFilename);
 
     const buf = Buffer.from(await file.arrayBuffer());
     await fs.writeFile(absFilename, buf);
