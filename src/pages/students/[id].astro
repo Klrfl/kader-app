@@ -3,12 +3,15 @@ import MainLayout from "@/layouts/MainLayout.astro";
 import { Image } from "astro:assets";
 
 import { actions, isInputError } from "astro:actions";
-import { newStudentRepo, newGroupRepo } from "@/repositories/";
+import { newStudentRepo, newGroupRepo, newImageRepo } from "@/repositories/";
 
 const { id } = Astro.params;
 if (!id || Number.isNaN(Number(id))) throw new Error("no id");
 
 const student = await newStudentRepo().getVerboseStudent(Number(id));
+const { result: image, error: imageError } = await newImageRepo().getImage(
+  student.id
+);
 const groups = await newGroupRepo().getGroups();
 const bloodTypes = [
   { name: "A" },
@@ -31,16 +34,25 @@ const month = Number(dob.getMonth() + 1);
 const date = dob.getDate().toString();
 const formattedDob = `${year.padStart(2, "0")}-${month.toString().padStart(2, "0")}-${date.padStart(2, "0")}`;
 
-const result = Astro.getActionResult(actions.students.update);
-const inputErrors = isInputError(result?.error) ? result.error.fields : {};
+const studentUpdateResult = Astro.getActionResult(actions.students.update);
+const inputErrors = isInputError(studentUpdateResult?.error)
+  ? studentUpdateResult.error.fields
+  : {};
 const redirectTo = Astro.url.searchParams.get("redirectTo");
 
-if (result) {
-  if (result.error) console.error(result.error);
-  if (!result.error) {
-    const { redirectTo } = result.data;
+if (studentUpdateResult) {
+  if (studentUpdateResult.error) console.error(studentUpdateResult.error);
+  if (!studentUpdateResult.error) {
+    const { redirectTo } = studentUpdateResult.data;
     return Astro.redirect(decodeURIComponent(redirectTo));
   }
+}
+
+const imageUpdateResult = Astro.getActionResult(
+  actions.images.uploadStudentImage
+);
+if (imageUpdateResult && imageUpdateResult.error) {
+  console.error(imageUpdateResult.error);
 }
 
 const title = `Kader App | ${student?.name}`;
@@ -48,11 +60,11 @@ const title = `Kader App | ${student?.name}`;
 
 <MainLayout title={title}>
   {
-    result?.error && (
+    studentUpdateResult?.error && (
       <header class="py-6 px-8 bg-red-700/25 outline-1 outline-red-500">
         <p>There was an error!</p>
 
-        {result.error.code === "BAD_REQUEST" && (
+        {studentUpdateResult.error.code === "BAD_REQUEST" && (
           <p>Please check your inputs.</p>
         )}
 
@@ -66,7 +78,7 @@ const title = `Kader App | ${student?.name}`;
   }
   {
     student ? (
-      <div class="grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-2 gap-4 px-4 lg:p-0">
         <header class="col-span-full lg:col-span-2">
           Editing
           <h1 class="text-2xl">
@@ -77,27 +89,15 @@ const title = `Kader App | ${student?.name}`;
         <form
           action={actions.students.update}
           method="post"
-          class="col-span-full lg:col-span-[auto] px-6 py-4 grid grid-cols-2 gap-4 max-w-2xl rounded border-2 border-base-content/20"
-          enctype="multipart/form-data"
+          class="col-span-full lg:col-span-1 px-6 py-4 grid sm:grid-cols-2 gap-4 rounded border-2 border-base-content/20"
         >
           <input type="hidden" name="redirectTo" value={redirectTo} />
-          <label class="label" for="image">
-            Image
-          </label>
-          <input
-            type="file"
-            name="image"
-            id="image"
-            accept="image/*"
-            class="file-input"
-          />
-
           <input type="hidden" name="id" value={student.id} />
           <label class="label" for="name">
             Name
           </label>
           <input
-            class="input"
+            class="input w-full"
             type="text"
             name="name"
             id="name"
@@ -109,7 +109,7 @@ const title = `Kader App | ${student?.name}`;
           </label>
           <input
             type="text"
-            class="input"
+            class="input w-full"
             name="nickname"
             id="nickname"
             value={student.nickname}
@@ -119,13 +119,18 @@ const title = `Kader App | ${student?.name}`;
           <label class="label" for="hobby">
             Hobby
           </label>
-          <input type="text" class="input" name="hobby" value={student.hobby} />
+          <input
+            type="text"
+            class="input w-full"
+            name="hobby"
+            value={student.hobby}
+          />
 
           <label class="label" for="blood_type">
             Blood types
           </label>
 
-          <select class="select" name="blood_type" id="blood_type">
+          <select class="select w-full" name="blood_type" id="blood_type">
             <option value={null} selected={student.blood_type === null}>
               None
             </option>
@@ -143,7 +148,7 @@ const title = `Kader App | ${student?.name}`;
           <label class="label">Place, date of birth</label>
           <input
             type="text"
-            class="input"
+            class="input w-full"
             disabled
             value={student.place_of_birth}
           />
@@ -154,7 +159,7 @@ const title = `Kader App | ${student?.name}`;
 
           <input
             type="date"
-            class="input"
+            class="input w-full"
             name="date_of_birth"
             id="date_of_birth"
             value={formattedDob}
@@ -163,12 +168,18 @@ const title = `Kader App | ${student?.name}`;
           <label for="address" class="label">
             Address
           </label>
-          <input type="text" class="input" name="address" id="address" />
+          <input
+            type="text"
+            class="input w-full"
+            name="address"
+            id="address"
+            value={student.address}
+          />
 
           <label class="label" for="group_id">
             Group
           </label>
-          <select class="select" name="group_id" id="group_id">
+          <select class="select w-full" name="group_id" id="group_id">
             {groups.map((group) => (
               <option selected={group.id === student.group_id} value={group.id}>
                 {group.name}
@@ -197,16 +208,78 @@ const title = `Kader App | ${student?.name}`;
           </button>
         </form>
 
-        {student.image_filename && (
-          <Image
-            class="border-2 border-base-content/20 rounded"
-            id="student-image"
-            width={300}
-            height={400}
-            src={`/images/${student.image_filename}`}
-            alt={student.name}
-          />
+        {studentUpdateResult?.error && (
+          <ul class="col-span-full flex flex-col gap-y-4">
+            <li class="bg-red-300">{studentUpdateResult.error.message}</li>
+          </ul>
         )}
+
+        {imageError && (
+          <ul class="col-span-full flex flex-col gap-y-4">
+            <li class="bg-red-300">{imageError?.message}</li>
+          </ul>
+        )}
+
+        <form
+          action={actions.images.uploadStudentImage}
+          method="POST"
+          enctype="multipart/form-data"
+          class="grid gap-4 lg:grid-cols-[15rem_1fr] col-span-full lg:col-span-1"
+        >
+          <output class="justify-self-center">
+            {student.image_filename && (
+              <Image
+                class="border-2 border-base-content/20 rounded aspect-[3/4] object-cover"
+                id="student-image"
+                width={300}
+                height={400}
+                src={`/images/${student.image_filename}`}
+                alt={student.name}
+              />
+            )}
+          </output>
+
+          <label
+            for="image"
+            id="drop-zone"
+            class="cursor-pointer block text-center border-dashed border-2 border-base-content/20 py-16 px-8"
+          >
+            Drag and drop here
+          </label>
+          <input type="hidden" name="student_id" value={student.id} />
+          <input
+            type="file"
+            id="image"
+            name="image"
+            accept="image/*"
+            class="hidden"
+          />
+
+          <label
+            class="label col-span-full justify-self-end"
+            for="has_been_printed"
+          >
+            Has been printed?
+            <input
+              type="checkbox"
+              class="checkbox"
+              name="has_been_printed"
+              id="has_been_printed"
+              checked={Boolean(image?.has_been_printed ?? 0)}
+            />
+          </label>
+
+          <button
+            class="btn btn-error btn-soft"
+            type="button"
+            id="clear-student-image"
+          >
+            Clear
+          </button>
+          <button class="btn btn-primary btn-soft" type="submit">
+            Update/Upload
+          </button>
+        </form>
 
         <form
           class="rounded border-2 border-base-content/20"
@@ -236,10 +309,76 @@ const title = `Kader App | ${student?.name}`;
 </MainLayout>
 
 <script>
-  const studentImageEl = document.getElementById("student-image");
-  const studentForm: HTMLFormElement | null = document.getElementById("image");
+  // prevent dragging stuff on top of things other than the dropzone
+  window.addEventListener("drop", (e) => {
+    const hasFile = Array.from(e.dataTransfer?.items ?? []).some(
+      (item) => item.kind === "file"
+    );
 
-  studentForm?.addEventListener("change", (e) => {
-    console.log(e.files[0]);
+    if (hasFile) {
+      e.preventDefault();
+    }
+  });
+  const dropZone = document.getElementById("drop-zone");
+
+  window.addEventListener("dragover", (e) => {
+    const fileItems = Array.from(e.dataTransfer?.items ?? []).filter(
+      (i) => i.kind === "file"
+    );
+
+    if (e.dataTransfer && fileItems.length > 0) {
+      e.preventDefault();
+
+      if (!dropZone?.contains(e.target)) {
+        e.dataTransfer.dropEffect = "none";
+      }
+    }
+  });
+
+  dropZone?.addEventListener("dragover", (e) => {
+    const fileItems = Array.from(e.dataTransfer?.items ?? []).filter(
+      (item) => item.kind === "file"
+    );
+
+    if (e.dataTransfer && fileItems.length > 0) {
+      e.preventDefault();
+
+      if (fileItems.some((item) => item.type.startsWith("image/"))) {
+        e.dataTransfer.dropEffect = "copy";
+      } else {
+        e.dataTransfer.dropEffect = "none";
+      }
+    }
+  });
+
+  function previewImage(newImage: File) {
+    const img = document.getElementById(
+      "student-image"
+    ) as HTMLImageElement | null;
+    if (!img) return console.error("no image element detected");
+
+    img.src = URL.createObjectURL(newImage);
+  }
+
+  dropZone?.addEventListener("drop", handleDrop);
+
+  function handleDrop(e: DragEvent) {
+    e.preventDefault();
+    const file = Array.from(e.dataTransfer?.items ?? []).filter(
+      (item) => item.kind === "file"
+    )[0];
+
+    const newImage = file.getAsFile();
+    if (!newImage) console.error("no image detected");
+
+    if (newImage) previewImage(newImage);
+  }
+
+  const imageInputEl = document.getElementById(
+    "image"
+  ) as HTMLInputElement | null;
+  imageInputEl?.addEventListener("change", () => {
+    const newImage = imageInputEl.files?.[0];
+    if (newImage) previewImage(newImage);
   });
 </script>

@@ -1,15 +1,21 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { UPLOAD_BASE } from "astro:env/server";
 import { db } from "@/database";
 import type { DB } from "@/database/database.types";
-import type { Image } from "@/types";
+import type { Image, UpdateableImage } from "@/types";
 import type { Kysely } from "kysely";
 import { ActionError } from "astro:actions";
+import { AppError } from "@/errors";
 
 type getImagesParams = {
   groupId?: number;
   showPrinted?: boolean;
+};
+
+type VerboseImage = Image & {
+  student_name: string | null;
+  group_name: string | null;
 };
 
 type UploadResult =
@@ -22,8 +28,14 @@ type UploadResult =
       error: ActionError;
     };
 
+type ImageResult =
+  | { result: Image; error: null }
+  | { result: null; error: AppError };
+
 interface ImageRepository {
-  getImages(params: getImagesParams): Promise<Image[]>;
+  getImage(student_id: number): Promise<ImageResult>;
+  getImages(params: getImagesParams): Promise<VerboseImage[]>;
+  updateImage(student_id: number, input: UpdateableImage): Promise<ImageResult>;
   uploadStudentImage(
     file: unknown,
     filename: string,
@@ -32,12 +44,19 @@ interface ImageRepository {
 }
 
 export class SQLiteImageRepo implements ImageRepository {
+  private UPLOAD_BASE: string;
   private db: Kysely<DB>;
+
   constructor(db: Kysely<DB>) {
     this.db = db;
+
+    this.UPLOAD_BASE = UPLOAD_BASE;
   }
 
-  async getImages({ groupId = 0, showPrinted }: getImagesParams) {
+  async getImages({
+    groupId = 0,
+    showPrinted,
+  }: getImagesParams): Promise<VerboseImage[]> {
     let query = this.db
       .selectFrom("images as i")
       .leftJoin("students as s", "s.id", "i.student_id")
@@ -66,27 +85,61 @@ export class SQLiteImageRepo implements ImageRepository {
     return images;
   }
 
+  async updateImage(
+    student_id: number,
+    input: UpdateableImage
+  ): Promise<ImageResult> {
+    const result = await this.db
+      .updateTable("images")
+      .set(input)
+      .where("student_id", "=", student_id)
+      .returningAll()
+      .executeTakeFirst();
+
+    if (!result) {
+      const error = new AppError(
+        "failed to update image data",
+        "IMAGE_UPDATE_ERROR"
+      );
+      return { result: null, error };
+    }
+
+    return { result, error: null };
+  }
+
   async uploadStudentImage(file: File, filename: string, student_id: number) {
-    const wd = path.dirname(fileURLToPath(import.meta.url));
-    const imagesBase = path.join(wd, "../../public/images/"); // TODO: don't put the path directly here
+    const uploadBase = this.UPLOAD_BASE;
     const normalizedFilename = encodeURIComponent(filename);
-    const absFilename = path.join(imagesBase, normalizedFilename);
+    const absFilename = path.join(uploadBase, normalizedFilename);
 
     const buf = Buffer.from(await file.arrayBuffer());
-    await fs.writeFile(absFilename, buf);
+    try {
+      await fs.writeFile(absFilename, buf);
 
-    console.log("successfully written file to ", absFilename);
+      console.log("successfully written file to ", absFilename);
+    } catch (err) {
+      console.error(err);
+
+      const error = new ActionError({
+        message: "failed to write file to " + absFilename,
+        code: "INTERNAL_SERVER_ERROR",
+      });
+
+      return { result: null, error };
+    }
 
     const insertImageResult = await this.db
       .insertInto("images")
       .values({ student_id: student_id, filename: normalizedFilename })
       .onConflict((oc) =>
-        oc.column("filename").doUpdateSet({ filename: normalizedFilename })
+        oc.column("student_id").doUpdateSet({ filename: normalizedFilename })
       )
       .returningAll()
       .executeTakeFirst();
 
     if (!insertImageResult) {
+      console.log(insertImageResult);
+
       const error = new ActionError({
         message: "failed to upload image.",
         code: "INTERNAL_SERVER_ERROR",
@@ -96,6 +149,21 @@ export class SQLiteImageRepo implements ImageRepository {
     }
 
     return { result: insertImageResult, error: null };
+  }
+
+  async getImage(student_id: number): Promise<ImageResult> {
+    const image = await this.db
+      .selectFrom("images")
+      .where("student_id", "=", student_id)
+      .selectAll()
+      .executeTakeFirst();
+
+    if (!image) {
+      const error = new AppError("failed to get image", "IMAGE_SELECT_ERROR");
+      return { result: null, error };
+    }
+
+    return { result: image, error: null };
   }
 }
 

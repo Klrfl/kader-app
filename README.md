@@ -25,8 +25,16 @@ All commands are run from the root of the project, from a terminal:
 
 first copy the .env.example file, name it .env. Set the respective variables:
 
-- PORT: port to run your app, defaults to 3000
-- FILE_PATH: path to your kader images.
+- DATABASE_URL: where your SQLite database file is located. Defaults to `./database.sqlite`
+- UPLOAD_BASE: base to upload your kader images to. set this to whatever you want, I personally set this to `/var/www/images/`.
+
+After setting `UPLOAD_BASE`, you can make a symbolic link from `public/images` to `UPLOAD_BASE` so the app can serve your photos from `UPLOAD_BASE`
+
+```sh
+# if you're on UNIX like systems
+# make sure to execute the following once in the root of your project
+sudo ln -s /var/wwww/images /public/images
+```
 
 ```sh
 # if you're on UNIX like systems
