@@ -13,6 +13,11 @@ type getImagesParams = {
   showPrinted?: boolean;
 };
 
+type VerboseImage = Image & {
+  student_name: string | null;
+  group_name: string | null;
+};
+
 type UploadResult =
   | {
       result: Image;
@@ -29,7 +34,7 @@ type ImageResult =
 
 interface ImageRepository {
   getImage(student_id: number): Promise<ImageResult>;
-  getImages(params: getImagesParams): Promise<Image[]>;
+  getImages(params: getImagesParams): Promise<VerboseImage[]>;
   updateImage(student_id: number, input: UpdateableImage): Promise<ImageResult>;
   uploadStudentImage(
     file: unknown,
@@ -48,7 +53,10 @@ export class SQLiteImageRepo implements ImageRepository {
     this.UPLOAD_BASE = UPLOAD_BASE;
   }
 
-  async getImages({ groupId = 0, showPrinted }: getImagesParams) {
+  async getImages({
+    groupId = 0,
+    showPrinted,
+  }: getImagesParams): Promise<VerboseImage[]> {
     let query = this.db
       .selectFrom("images as i")
       .leftJoin("students as s", "s.id", "i.student_id")
