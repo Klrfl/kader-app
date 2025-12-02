@@ -1,4 +1,5 @@
 import { newImageRepo, newStudentRepo } from "@/repositories";
+import type { UpdateableImage } from "@/types";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 
@@ -7,11 +8,15 @@ export const uploadStudentImage = defineAction({
   input: z.object({
     image: z.instanceof(File).optional(),
     student_id: z.coerce.number(),
-    has_been_printed: z.boolean().default(false).optional(),
+    has_been_printed: z.boolean().default(false),
   }),
 
   handler: async (input) => {
-    console.log(input.image);
+    const imageRepo = newImageRepo();
+
+    const newImageData: UpdateableImage = {
+      has_been_printed: Number(input.has_been_printed),
+    };
 
     if (input.image && input.image.size > 0) {
       const studentRepo = newStudentRepo();
@@ -22,16 +27,28 @@ export const uploadStudentImage = defineAction({
         : "xxx";
 
       const [_, ext] = input.image.type.split("/");
-      const filename = `${student.group_name}.${trimmedNim}-${student.nickname}.${ext}`;
+      const filename =
+        `${student.group_name}.${trimmedNim}-${student.nickname}.${ext}`.toLowerCase();
 
-      const imageRepo = newImageRepo();
+      newImageData.filename = filename;
+
       const { error } = await imageRepo.uploadStudentImage(
         input.image,
-        filename.toLowerCase(),
+        filename,
         student.id
       );
 
       if (error) throw error;
     }
+
+    const { result, error: updateError } = await imageRepo.updateImage(
+      input.student_id,
+      newImageData
+    );
+
+    // TODO: proper error handling
+    if (updateError) throw updateError;
+
+    return result;
   },
 });

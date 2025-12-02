@@ -3,12 +3,15 @@ import MainLayout from "@/layouts/MainLayout.astro";
 import { Image } from "astro:assets";
 
 import { actions, isInputError } from "astro:actions";
-import { newStudentRepo, newGroupRepo } from "@/repositories/";
+import { newStudentRepo, newGroupRepo, newImageRepo } from "@/repositories/";
 
 const { id } = Astro.params;
 if (!id || Number.isNaN(Number(id))) throw new Error("no id");
 
 const student = await newStudentRepo().getVerboseStudent(Number(id));
+const { result: image, error: imageError } = await newImageRepo().getImage(
+  student.id
+);
 const groups = await newGroupRepo().getGroups();
 const bloodTypes = [
   { name: "A" },
@@ -151,7 +154,13 @@ const title = `Kader App | ${student?.name}`;
           <label for="address" class="label">
             Address
           </label>
-          <input type="text" class="input" name="address" id="address" />
+          <input
+            type="text"
+            class="input"
+            name="address"
+            id="address"
+            value={student.address}
+          />
 
           <label class="label" for="group_id">
             Group
@@ -226,6 +235,7 @@ const title = `Kader App | ${student?.name}`;
               class="checkbox"
               name="has_been_printed"
               id="has_been_printed"
+              value={image.has_been_printed}
             />
 
             <button
@@ -295,9 +305,15 @@ const title = `Kader App | ${student?.name}`;
     }
   });
 
-  const img = document.getElementById(
-    "student-image"
-  ) as HTMLImageElement | null;
+  function previewImage(newImage: File) {
+    const img = document.getElementById(
+      "student-image"
+    ) as HTMLImageElement | null;
+    if (!img) return console.error("no image element detected");
+
+    img.src = URL.createObjectURL(newImage);
+  }
+
   dropZone?.addEventListener("dragover", (e) => {
     const fileItems = Array.from(e.dataTransfer?.items ?? []).filter(
       (item) => item.kind === "file"
@@ -325,8 +341,6 @@ const title = `Kader App | ${student?.name}`;
     const newImage = file.getAsFile();
     if (!newImage) console.error("no image detected");
 
-    if (newImage && img) {
-      img.src = URL.createObjectURL(newImage);
-    }
+    if (newImage) previewImage(newImage);
   }
 </script>

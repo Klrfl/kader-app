@@ -4,6 +4,7 @@ import type { Insertable } from "kysely";
 import type { Selectable } from "kysely";
 
 export type Image = Selectable<Images>;
+export type UpdateableImage = Updateable<Images>;
 
 export interface Group {
   id: number;
