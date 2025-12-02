@@ -69,7 +69,7 @@ const title = `Kader App | ${student?.name}`;
   }
   {
     student ? (
-      <div class="grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-2 gap-4 px-4 lg:p-0">
         <header class="col-span-full lg:col-span-2">
           Editing
           <h1 class="text-2xl">
@@ -80,7 +80,7 @@ const title = `Kader App | ${student?.name}`;
         <form
           action={actions.students.update}
           method="post"
-          class="col-span-full lg:col-span-1 px-6 py-4 grid grid-cols-2 gap-4 max-w-2xl rounded border-2 border-base-content/20"
+          class="col-span-full lg:col-span-1 px-6 py-4 grid sm:grid-cols-2 gap-4 rounded border-2 border-base-content/20"
         >
           <input type="hidden" name="redirectTo" value={redirectTo} />
           <input type="hidden" name="id" value={student.id} />
@@ -88,7 +88,7 @@ const title = `Kader App | ${student?.name}`;
             Name
           </label>
           <input
-            class="input"
+            class="input w-full"
             type="text"
             name="name"
             id="name"
@@ -100,7 +100,7 @@ const title = `Kader App | ${student?.name}`;
           </label>
           <input
             type="text"
-            class="input"
+            class="input w-full"
             name="nickname"
             id="nickname"
             value={student.nickname}
@@ -110,13 +110,18 @@ const title = `Kader App | ${student?.name}`;
           <label class="label" for="hobby">
             Hobby
           </label>
-          <input type="text" class="input" name="hobby" value={student.hobby} />
+          <input
+            type="text"
+            class="input w-full"
+            name="hobby"
+            value={student.hobby}
+          />
 
           <label class="label" for="blood_type">
             Blood types
           </label>
 
-          <select class="select" name="blood_type" id="blood_type">
+          <select class="select w-full" name="blood_type" id="blood_type">
             <option value={null} selected={student.blood_type === null}>
               None
             </option>
@@ -134,7 +139,7 @@ const title = `Kader App | ${student?.name}`;
           <label class="label">Place, date of birth</label>
           <input
             type="text"
-            class="input"
+            class="input w-full"
             disabled
             value={student.place_of_birth}
           />
@@ -145,7 +150,7 @@ const title = `Kader App | ${student?.name}`;
 
           <input
             type="date"
-            class="input"
+            class="input w-full"
             name="date_of_birth"
             id="date_of_birth"
             value={formattedDob}
@@ -156,7 +161,7 @@ const title = `Kader App | ${student?.name}`;
           </label>
           <input
             type="text"
-            class="input"
+            class="input w-full"
             name="address"
             id="address"
             value={student.address}
@@ -165,7 +170,7 @@ const title = `Kader App | ${student?.name}`;
           <label class="label" for="group_id">
             Group
           </label>
-          <select class="select" name="group_id" id="group_id">
+          <select class="select w-full" name="group_id" id="group_id">
             {groups.map((group) => (
               <option selected={group.id === student.group_id} value={group.id}>
                 {group.name}
@@ -194,42 +199,52 @@ const title = `Kader App | ${student?.name}`;
           </button>
         </form>
 
-        <div class="grid lg:grid-cols-[15rem_1fr]">
-          {result?.error && (
-            <ul class="flex flex-col gap-y-4 col-span-2">
-              <li>{result.error.message}</li>
-            </ul>
-          )}
+        {result?.error && (
+          <ul class="col-span-full flex flex-col gap-y-4">
+            <li>{result.error.message}</li>
+          </ul>
+        )}
 
-          {student.image_filename && (
-            <Image
-              class="w-full border-2 border-base-content/20 rounded aspect-[3/4] object-cover"
-              id="student-image"
-              width={300}
-              height={400}
-              src={`/images/${student.image_filename}`}
-              alt={student.name}
-            />
-          )}
+        <form
+          action={actions.images.uploadStudentImage}
+          method="POST"
+          enctype="multipart/form-data"
+          class="grid gap-4 lg:grid-cols-[15rem_1fr] col-span-full lg:col-span-1"
+        >
+          <output class="justify-self-center">
+            {student.image_filename && (
+              <Image
+                class="border-2 border-base-content/20 rounded aspect-[3/4] object-cover"
+                id="student-image"
+                width={300}
+                height={400}
+                src={`/images/${student.image_filename}`}
+                alt={student.name}
+              />
+            )}
+          </output>
 
-          <form
-            action={actions.images.uploadStudentImage}
-            method="POST"
-            enctype="multipart/form-data"
+          <label
+            for="image"
+            id="drop-zone"
+            class="cursor-pointer block text-center border-dashed border-2 border-base-content/20 py-16 px-8"
           >
-            <label
-              for="image"
-              id="drop-zone"
-              class="block text-center w-full border-dashed border-2 border-base-content/20 py-16 px-8"
-            >
-              Drag and drop here
-            </label>
-            <input type="hidden" name="student_id" value={student.id} />
-            <input type="file" id="image" name="image" accept="image/*" />
+            Drag and drop here
+          </label>
+          <input type="hidden" name="student_id" value={student.id} />
+          <input
+            type="file"
+            id="image"
+            name="image"
+            accept="image/*"
+            class="hidden"
+          />
 
-            <label class="label" for="has_been_printed">
-              Has been printed?
-            </label>
+          <label
+            class="label col-span-full justify-self-end"
+            for="has_been_printed"
+          >
+            Has been printed?
             <input
               type="checkbox"
               class="checkbox"
@@ -237,19 +252,19 @@ const title = `Kader App | ${student?.name}`;
               id="has_been_printed"
               value={image.has_been_printed}
             />
+          </label>
 
-            <button
-              class="btn btn-error btn-soft"
-              type="button"
-              id="clear-student-image"
-            >
-              Clear
-            </button>
-            <button class="btn btn-primary btn-soft" type="submit">
-              Upload
-            </button>
-          </form>
-        </div>
+          <button
+            class="btn btn-error btn-soft"
+            type="button"
+            id="clear-student-image"
+          >
+            Clear
+          </button>
+          <button class="btn btn-primary btn-soft" type="submit">
+            Upload
+          </button>
+        </form>
 
         <form
           class="rounded border-2 border-base-content/20"
