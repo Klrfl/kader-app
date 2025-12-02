@@ -305,15 +305,6 @@ const title = `Kader App | ${student?.name}`;
     }
   });
 
-  function previewImage(newImage: File) {
-    const img = document.getElementById(
-      "student-image"
-    ) as HTMLImageElement | null;
-    if (!img) return console.error("no image element detected");
-
-    img.src = URL.createObjectURL(newImage);
-  }
-
   dropZone?.addEventListener("dragover", (e) => {
     const fileItems = Array.from(e.dataTransfer?.items ?? []).filter(
       (item) => item.kind === "file"
@@ -330,6 +321,15 @@ const title = `Kader App | ${student?.name}`;
     }
   });
 
+  function previewImage(newImage: File) {
+    const img = document.getElementById(
+      "student-image"
+    ) as HTMLImageElement | null;
+    if (!img) return console.error("no image element detected");
+
+    img.src = URL.createObjectURL(newImage);
+  }
+
   dropZone?.addEventListener("drop", handleDrop);
 
   function handleDrop(e: DragEvent) {
@@ -343,4 +343,12 @@ const title = `Kader App | ${student?.name}`;
 
     if (newImage) previewImage(newImage);
   }
+
+  const imageInputEl = document.getElementById(
+    "image"
+  ) as HTMLInputElement | null;
+  imageInputEl?.addEventListener("change", () => {
+    const newImage = imageInputEl.files?.[0];
+    if (newImage) previewImage(newImage);
+  });
 </script>
