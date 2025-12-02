@@ -6,7 +6,6 @@ import { actions } from "astro:actions";
 const groups = await newGroupRepo().getGroups();
 
 const response = Astro.getActionResult(actions.students.create);
-console.log(response);
 
 if (response && !response.error) {
   return Astro.redirect("/students");

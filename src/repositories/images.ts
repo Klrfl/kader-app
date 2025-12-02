@@ -138,8 +138,6 @@ export class SQLiteImageRepo implements ImageRepository {
       .executeTakeFirst();
 
     if (!insertImageResult) {
-      console.log(insertImageResult);
-
       const error = new ActionError({
         message: "failed to upload image.",
         code: "INTERNAL_SERVER_ERROR",

@@ -41,13 +41,10 @@ export const uploadStudentImage = defineAction({
       if (error) throw error;
     }
 
-    console.log(input);
-    console.log(newImageData);
     const { result, error: updateError } = await imageRepo.updateImage(
       input.student_id,
       newImageData
     );
-    console.log(result);
 
     // TODO: proper error handling
     if (updateError) throw updateError;
