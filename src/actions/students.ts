@@ -1,4 +1,4 @@
-import { newGroupRepo, newImageRepo, newStudentRepo } from "@/repositories/";
+import { newStudentRepo } from "@/repositories/";
 import type { InsertableStudent, UpdateableStudent } from "@/types";
 import { defineAction, ActionError } from "astro:actions";
 import { z } from "astro:schema";
@@ -19,7 +19,6 @@ export const studentUpdate = defineAction({
     group_id: z.number().int().positive(),
     has_bonded_with: z.boolean(),
     address: z.string().optional(),
-    image: z.instanceof(File).optional().nullable(),
   }),
   handler: async (input) => {
     // TODO: handle errors
@@ -46,27 +45,6 @@ export const studentUpdate = defineAction({
         message: "failed to update student",
         code: "INTERNAL_SERVER_ERROR",
       });
-    }
-
-    if (input.image && input.image.size > 0) {
-      const groupRepo = newGroupRepo();
-      const group = await groupRepo.getGroup(input.group_id);
-
-      const trimmedNim = student.nim
-        ? student.nim.slice(student.nim!.length - 3)
-        : "xxx";
-
-      const [_, ext] = input.image.type.split("/");
-      const filename = `${group.name}.${trimmedNim}-${input.nickname}.${ext}`;
-
-      const imageRepo = newImageRepo();
-      const { error } = await imageRepo.uploadStudentImage(
-        input.image,
-        filename.toLowerCase(),
-        student.id
-      );
-
-      if (error) throw error;
     }
 
     return { redirectTo: input.redirectTo };

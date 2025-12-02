@@ -77,21 +77,9 @@ const title = `Kader App | ${student?.name}`;
         <form
           action={actions.students.update}
           method="post"
-          class="col-span-full lg:col-span-[auto] px-6 py-4 grid grid-cols-2 gap-4 max-w-2xl rounded border-2 border-base-content/20"
-          enctype="multipart/form-data"
+          class="col-span-full lg:col-span-1 px-6 py-4 grid grid-cols-2 gap-4 max-w-2xl rounded border-2 border-base-content/20"
         >
           <input type="hidden" name="redirectTo" value={redirectTo} />
-          <label class="label" for="image">
-            Image
-          </label>
-          <input
-            type="file"
-            name="image"
-            id="image"
-            accept="image/*"
-            class="file-input"
-          />
-
           <input type="hidden" name="id" value={student.id} />
           <label class="label" for="name">
             Name
@@ -197,16 +185,61 @@ const title = `Kader App | ${student?.name}`;
           </button>
         </form>
 
-        {student.image_filename && (
-          <Image
-            class="border-2 border-base-content/20 rounded"
-            id="student-image"
-            width={300}
-            height={400}
-            src={`/images/${student.image_filename}`}
-            alt={student.name}
-          />
-        )}
+        <div class="grid lg:grid-cols-[15rem_1fr]">
+          {result?.error && (
+            <ul class="flex flex-col gap-y-4 col-span-2">
+              <li>{result.error.message}</li>
+            </ul>
+          )}
+
+          {student.image_filename && (
+            <Image
+              class="w-full border-2 border-base-content/20 rounded aspect-[3/4] object-cover"
+              id="student-image"
+              width={300}
+              height={400}
+              src={`/images/${student.image_filename}`}
+              alt={student.name}
+            />
+          )}
+
+          <form
+            action={actions.images.uploadStudentImage}
+            method="POST"
+            enctype="multipart/form-data"
+          >
+            <label
+              for="image"
+              id="drop-zone"
+              class="block text-center w-full border-dashed border-2 border-base-content/20 py-16 px-8"
+            >
+              Drag and drop here
+            </label>
+            <input type="hidden" name="student_id" value={student.id} />
+            <input type="file" id="image" name="image" accept="image/*" />
+
+            <label class="label" for="has_been_printed">
+              Has been printed?
+            </label>
+            <input
+              type="checkbox"
+              class="checkbox"
+              name="has_been_printed"
+              id="has_been_printed"
+            />
+
+            <button
+              class="btn btn-error btn-soft"
+              type="button"
+              id="clear-student-image"
+            >
+              Clear
+            </button>
+            <button class="btn btn-primary btn-soft" type="submit">
+              Upload
+            </button>
+          </form>
+        </div>
 
         <form
           class="rounded border-2 border-base-content/20"
@@ -236,10 +269,64 @@ const title = `Kader App | ${student?.name}`;
 </MainLayout>
 
 <script>
-  const studentImageEl = document.getElementById("student-image");
-  const studentForm: HTMLFormElement | null = document.getElementById("image");
+  // prevent dragging stuff on top of things other than the dropzone
+  window.addEventListener("drop", (e) => {
+    const hasFile = Array.from(e.dataTransfer?.items ?? []).some(
+      (item) => item.kind === "file"
+    );
 
-  studentForm?.addEventListener("change", (e) => {
-    console.log(e.files[0]);
+    if (hasFile) {
+      e.preventDefault();
+    }
   });
+  const dropZone = document.getElementById("drop-zone");
+
+  window.addEventListener("dragover", (e) => {
+    const fileItems = Array.from(e.dataTransfer?.items ?? []).filter(
+      (i) => i.kind === "file"
+    );
+
+    if (e.dataTransfer && fileItems.length > 0) {
+      e.preventDefault();
+
+      if (!dropZone?.contains(e.target)) {
+        e.dataTransfer.dropEffect = "none";
+      }
+    }
+  });
+
+  const img = document.getElementById(
+    "student-image"
+  ) as HTMLImageElement | null;
+  dropZone?.addEventListener("dragover", (e) => {
+    const fileItems = Array.from(e.dataTransfer?.items ?? []).filter(
+      (item) => item.kind === "file"
+    );
+
+    if (e.dataTransfer && fileItems.length > 0) {
+      e.preventDefault();
+
+      if (fileItems.some((item) => item.type.startsWith("image/"))) {
+        e.dataTransfer.dropEffect = "copy";
+      } else {
+        e.dataTransfer.dropEffect = "none";
+      }
+    }
+  });
+
+  dropZone?.addEventListener("drop", handleDrop);
+
+  function handleDrop(e: DragEvent) {
+    e.preventDefault();
+    const file = Array.from(e.dataTransfer?.items ?? []).filter(
+      (item) => item.kind === "file"
+    )[0];
+
+    const newImage = file.getAsFile();
+    if (!newImage) console.error("no image detected");
+
+    if (newImage && img) {
+      img.src = URL.createObjectURL(newImage);
+    }
+  }
 </script>
