@@ -9,9 +9,7 @@ const { id } = Astro.params;
 if (!id || Number.isNaN(Number(id))) throw new Error("no id");
 
 const student = await newStudentRepo().getVerboseStudent(Number(id));
-const { result: image, error: imageError } = await newImageRepo().getImage(
-  student.id
-);
+const { result: image } = await newImageRepo().getImage(student.id);
 const groups = await newGroupRepo().getGroups();
 const bloodTypes = [
   { name: "A" },
@@ -89,7 +87,7 @@ const title = `Kader App | ${student?.name}`;
         <form
           action={actions.students.update}
           method="post"
-          class="col-span-full lg:col-span-1 px-6 py-4 grid sm:grid-cols-2 gap-4 rounded border-2 border-base-content/20"
+          class="row-span-2 col-span-full lg:col-span-1 px-6 py-4 grid sm:grid-cols-2 gap-4 rounded border-2 border-base-content/20"
         >
           <input type="hidden" name="redirectTo" value={redirectTo} />
           <input type="hidden" name="id" value={student.id} />
@@ -209,14 +207,8 @@ const title = `Kader App | ${student?.name}`;
         </form>
 
         {studentUpdateResult?.error && (
-          <ul class="col-span-full flex flex-col gap-y-4">
+          <ul class="flex flex-col gap-y-4">
             <li class="bg-red-300">{studentUpdateResult.error.message}</li>
-          </ul>
-        )}
-
-        {imageError && (
-          <ul class="col-span-full flex flex-col gap-y-4">
-            <li class="bg-red-300">{imageError?.message}</li>
           </ul>
         )}
 
@@ -227,32 +219,27 @@ const title = `Kader App | ${student?.name}`;
           class="grid gap-4 lg:grid-cols-[15rem_1fr] col-span-full lg:col-span-1"
         >
           <output class="justify-self-center">
-            {student.image_filename && (
-              <Image
-                class="border-2 border-base-content/20 rounded aspect-[3/4] object-cover"
-                id="student-image"
-                width={300}
-                height={400}
-                src={`/images/${student.image_filename}`}
-                alt={student.name}
-              />
-            )}
+            <Image
+              class="border-2 border-base-content/20 rounded aspect-[3/4] object-cover"
+              id="student-image"
+              width={240}
+              height={320}
+              src={`/images/${student.image_filename}`}
+              alt={student.name}
+            />
           </output>
 
-          <label
-            for="image"
-            id="drop-zone"
-            class="cursor-pointer block text-center border-dashed border-2 border-base-content/20 py-16 px-8"
-          >
-            Drag and drop here
-          </label>
           <input type="hidden" name="student_id" value={student.id} />
+
+          <label for="drop-zone" class="sr-only">
+            Image drop-zone
+          </label>
           <input
             type="file"
             id="image"
             name="image"
             accept="image/*"
-            class="hidden"
+            class="cursor-pointer block text-center border-dashed border-2 border-base-content/20 py-16 px-8"
           />
 
           <label
@@ -309,6 +296,18 @@ const title = `Kader App | ${student?.name}`;
 </MainLayout>
 
 <script>
+  // the file input IS the dropzone
+  const imageInputEl = document.getElementById(
+    "image"
+  ) as HTMLInputElement | null;
+
+  imageInputEl?.addEventListener("drop", handleDrop);
+
+  imageInputEl?.addEventListener("change", () => {
+    const newImage = imageInputEl.files?.[0];
+    imageInputEl.files;
+    if (newImage) previewImage(newImage);
+  });
   // prevent dragging stuff on top of things other than the dropzone
   window.addEventListener("drop", (e) => {
     const hasFile = Array.from(e.dataTransfer?.items ?? []).some(
@@ -319,7 +318,6 @@ const title = `Kader App | ${student?.name}`;
       e.preventDefault();
     }
   });
-  const dropZone = document.getElementById("drop-zone");
 
   window.addEventListener("dragover", (e) => {
     const fileItems = Array.from(e.dataTransfer?.items ?? []).filter(
@@ -329,13 +327,13 @@ const title = `Kader App | ${student?.name}`;
     if (e.dataTransfer && fileItems.length > 0) {
       e.preventDefault();
 
-      if (!dropZone?.contains(e.target)) {
+      if (!imageInputEl?.contains(e.target)) {
         e.dataTransfer.dropEffect = "none";
       }
     }
   });
 
-  dropZone?.addEventListener("dragover", (e) => {
+  imageInputEl?.addEventListener("dragover", (e) => {
     const fileItems = Array.from(e.dataTransfer?.items ?? []).filter(
       (item) => item.kind === "file"
     );
@@ -360,8 +358,6 @@ const title = `Kader App | ${student?.name}`;
     img.src = URL.createObjectURL(newImage);
   }
 
-  dropZone?.addEventListener("drop", handleDrop);
-
   function handleDrop(e: DragEvent) {
     e.preventDefault();
     const file = Array.from(e.dataTransfer?.items ?? []).filter(
@@ -373,12 +369,4 @@ const title = `Kader App | ${student?.name}`;
 
     if (newImage) previewImage(newImage);
   }
-
-  const imageInputEl = document.getElementById(
-    "image"
-  ) as HTMLInputElement | null;
-  imageInputEl?.addEventListener("change", () => {
-    const newImage = imageInputEl.files?.[0];
-    if (newImage) previewImage(newImage);
-  });
 </script>
