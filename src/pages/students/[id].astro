@@ -34,16 +34,25 @@ const month = Number(dob.getMonth() + 1);
 const date = dob.getDate().toString();
 const formattedDob = `${year.padStart(2, "0")}-${month.toString().padStart(2, "0")}-${date.padStart(2, "0")}`;
 
-const result = Astro.getActionResult(actions.students.update);
-const inputErrors = isInputError(result?.error) ? result.error.fields : {};
+const studentUpdateResult = Astro.getActionResult(actions.students.update);
+const inputErrors = isInputError(studentUpdateResult?.error)
+  ? studentUpdateResult.error.fields
+  : {};
 const redirectTo = Astro.url.searchParams.get("redirectTo");
 
-if (result) {
-  if (result.error) console.error(result.error);
-  if (!result.error) {
-    const { redirectTo } = result.data;
+if (studentUpdateResult) {
+  if (studentUpdateResult.error) console.error(studentUpdateResult.error);
+  if (!studentUpdateResult.error) {
+    const { redirectTo } = studentUpdateResult.data;
     return Astro.redirect(decodeURIComponent(redirectTo));
   }
+}
+
+const imageUpdateResult = Astro.getActionResult(
+  actions.images.uploadStudentImage
+);
+if (imageUpdateResult && imageUpdateResult.error) {
+  console.error(imageUpdateResult.error);
 }
 
 const title = `Kader App | ${student?.name}`;
@@ -51,11 +60,11 @@ const title = `Kader App | ${student?.name}`;
 
 <MainLayout title={title}>
   {
-    result?.error && (
+    studentUpdateResult?.error && (
       <header class="py-6 px-8 bg-red-700/25 outline-1 outline-red-500">
         <p>There was an error!</p>
 
-        {result.error.code === "BAD_REQUEST" && (
+        {studentUpdateResult.error.code === "BAD_REQUEST" && (
           <p>Please check your inputs.</p>
         )}
 
@@ -199,9 +208,15 @@ const title = `Kader App | ${student?.name}`;
           </button>
         </form>
 
-        {result?.error && (
+        {studentUpdateResult?.error && (
           <ul class="col-span-full flex flex-col gap-y-4">
-            <li>{result.error.message}</li>
+            <li class="bg-red-300">{studentUpdateResult.error.message}</li>
+          </ul>
+        )}
+
+        {imageError && (
+          <ul class="col-span-full flex flex-col gap-y-4">
+            <li class="bg-red-300">{imageError?.message}</li>
           </ul>
         )}
 
@@ -250,7 +265,7 @@ const title = `Kader App | ${student?.name}`;
               class="checkbox"
               name="has_been_printed"
               id="has_been_printed"
-              value={image.has_been_printed}
+              checked={Boolean(image?.has_been_printed ?? 0)}
             />
           </label>
 
@@ -262,7 +277,7 @@ const title = `Kader App | ${student?.name}`;
             Clear
           </button>
           <button class="btn btn-primary btn-soft" type="submit">
-            Upload
+            Update/Upload
           </button>
         </form>
 
