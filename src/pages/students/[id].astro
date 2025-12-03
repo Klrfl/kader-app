@@ -303,52 +303,6 @@ const title = `Kader App | ${student?.name}`;
 
   imageInputEl?.addEventListener("drop", handleDrop);
 
-  imageInputEl?.addEventListener("change", () => {
-    const newImage = imageInputEl.files?.[0];
-    imageInputEl.files;
-    if (newImage) previewImage(newImage);
-  });
-  // prevent dragging stuff on top of things other than the dropzone
-  window.addEventListener("drop", (e) => {
-    const hasFile = Array.from(e.dataTransfer?.items ?? []).some(
-      (item) => item.kind === "file"
-    );
-
-    if (hasFile) {
-      e.preventDefault();
-    }
-  });
-
-  window.addEventListener("dragover", (e) => {
-    const fileItems = Array.from(e.dataTransfer?.items ?? []).filter(
-      (i) => i.kind === "file"
-    );
-
-    if (e.dataTransfer && fileItems.length > 0) {
-      e.preventDefault();
-
-      if (!imageInputEl?.contains(e.target)) {
-        e.dataTransfer.dropEffect = "none";
-      }
-    }
-  });
-
-  imageInputEl?.addEventListener("dragover", (e) => {
-    const fileItems = Array.from(e.dataTransfer?.items ?? []).filter(
-      (item) => item.kind === "file"
-    );
-
-    if (e.dataTransfer && fileItems.length > 0) {
-      e.preventDefault();
-
-      if (fileItems.some((item) => item.type.startsWith("image/"))) {
-        e.dataTransfer.dropEffect = "copy";
-      } else {
-        e.dataTransfer.dropEffect = "none";
-      }
-    }
-  });
-
   function previewImage(newImage: File) {
     const img = document.getElementById(
       "student-image"
@@ -359,12 +313,11 @@ const title = `Kader App | ${student?.name}`;
   }
 
   function handleDrop(e: DragEvent) {
-    e.preventDefault();
-    const file = Array.from(e.dataTransfer?.items ?? []).filter(
+    const file = Array.from(e.dataTransfer?.items ?? []).find(
       (item) => item.kind === "file"
-    )[0];
+    );
 
-    const newImage = file.getAsFile();
+    const newImage = file?.getAsFile();
     if (!newImage) console.error("no image detected");
 
     if (newImage) previewImage(newImage);
