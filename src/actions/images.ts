@@ -8,7 +8,7 @@ export const uploadStudentImage = defineAction({
   input: z.object({
     image: z.instanceof(File).optional(),
     student_id: z.coerce.number(),
-    has_been_printed: z.boolean(),
+    has_been_printed: z.coerce.boolean().default(false),
   }),
 
   handler: async (input) => {

@@ -6,7 +6,7 @@ import { actions, isInputError } from "astro:actions";
 import { newStudentRepo, newGroupRepo, newImageRepo } from "@/repositories/";
 
 const { id } = Astro.params;
-if (!id || Number.isNaN(Number(id))) throw new Error("no id");
+if (!id || Number.isNaN(Number(id))) return Astro.redirect("/students");
 
 const student = await newStudentRepo().getVerboseStudent(Number(id));
 const { result: image } = await newImageRepo().getImage(student.id);
@@ -302,6 +302,12 @@ const title = `Kader App | ${student?.name}`;
   ) as HTMLInputElement | null;
 
   imageInputEl?.addEventListener("drop", handleDrop);
+  imageInputEl?.addEventListener("change", (e) => {
+    if (imageInputEl?.files) {
+      const file = imageInputEl.files[0];
+      previewImage(file);
+    }
+  });
 
   function previewImage(newImage: File) {
     const img = document.getElementById(

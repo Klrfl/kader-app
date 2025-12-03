@@ -17,7 +17,7 @@ export const studentUpdate = defineAction({
     instagram_handle: z.string().trim().optional(),
     date_of_birth: z.coerce.date().optional(),
     group_id: z.number().int().positive(),
-    has_bonded_with: z.boolean(),
+    has_bonded_with: z.coerce.boolean(),
     address: z.string().optional(),
   }),
   handler: async (input) => {
