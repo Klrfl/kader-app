@@ -17,7 +17,6 @@ export default defineConfig({
         context: "server",
         access: "secret",
         optional: false,
-        default: "./database.sqlite",
       }),
     },
   },
