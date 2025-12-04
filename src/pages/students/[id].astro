@@ -271,11 +271,16 @@ const title = `Kader App | ${student?.name}`;
           <button
             class="btn btn-error btn-soft"
             type="button"
-            id="clear-student-image"
+            id="clear-image"
+            data-name="clear-image"
           >
             Clear
           </button>
-          <button class="btn btn-primary btn-soft" type="submit">
+          <button
+            data-name="update-image"
+            class="btn btn-primary btn-soft"
+            type="submit"
+          >
             Update/Upload
           </button>
         </form>
@@ -351,15 +356,45 @@ const title = `Kader App | ${student?.name}`;
     e.preventDefault();
 
     const formData = new FormData(studentImageForm);
+    const submitter = e.submitter;
 
-    const { data, error } = await actions.images.uploadStudentImage(formData);
+    switch (submitter?.dataset.name) {
+      case "update-image": {
+        await uploadImage(formData);
+        break;
+      }
+
+      case "clear-image": {
+        await deleteImage(formData);
+        break;
+      }
+
+      default:
+        console.log("what do I do now");
+    }
+  });
+
+  async function uploadImage(formData: FormData) {
+    const { error } = await actions.images.uploadStudentImage(formData);
 
     if (error) {
       console.error(error);
       alert("error when uploading image");
+      return;
     }
 
     alert("successfully uploaded image");
-    console.log(data);
-  });
+  }
+
+  async function deleteImage(formData: FormData) {
+    const { error } = await actions.images.deleteStudentImage(formData);
+
+    if (error) {
+      console.error(error);
+      alert("error when deleting image");
+      return;
+    }
+
+    alert("successfully deleted image");
+  }
 </script>
