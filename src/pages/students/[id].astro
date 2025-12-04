@@ -225,7 +225,7 @@ const title = `Kader App | ${student?.name}`;
         )}
 
         <form
-          action={actions.images.uploadStudentImage}
+          id="student-image-form"
           method="POST"
           enctype="multipart/form-data"
           class="grid gap-4 lg:grid-cols-[15rem_1fr] col-span-full lg:col-span-1"
@@ -308,6 +308,8 @@ const title = `Kader App | ${student?.name}`;
 </MainLayout>
 
 <script>
+  import { actions } from "astro:actions";
+
   // the file input IS the dropzone
   const imageInputEl = document.getElementById(
     "image"
@@ -340,4 +342,24 @@ const title = `Kader App | ${student?.name}`;
 
     if (newImage) previewImage(newImage);
   }
+
+  const studentImageForm = document.getElementById(
+    "student-image-form"
+  ) as HTMLFormElement | null;
+
+  studentImageForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(studentImageForm);
+
+    const { data, error } = await actions.images.uploadStudentImage(formData);
+
+    if (error) {
+      console.error(error);
+      alert("error when uploading image");
+    }
+
+    alert("successfully uploaded image");
+    console.log(data);
+  });
 </script>
