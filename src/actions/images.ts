@@ -28,9 +28,9 @@ export const uploadStudentImage = defineAction({
 
       const [_, ext] = input.image.type.split("/");
       const filename =
-        `${student.group_name}.${trimmedNim}-${student.nickname}.${ext}`.toLowerCase();
+        `${student.group_name?.trim()}.${trimmedNim}-${student.nickname?.trim()}.${ext}`.toLowerCase();
 
-      newImageData.filename = filename;
+      newImageData.filename = encodeURIComponent(filename);
 
       const { error } = await imageRepo.uploadStudentImage(
         input.image,
