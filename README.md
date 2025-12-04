@@ -28,14 +28,6 @@ first copy the .env.example file, name it .env. Set the respective variables:
 - DATABASE_URL: where your SQLite database file is located. Defaults to `./database.sqlite`
 - UPLOAD_BASE: base to upload your kader images to. set this to whatever you want, I personally set this to `/var/www/images/`.
 
-After setting `UPLOAD_BASE`, you can make a symbolic link from `public/images` to `UPLOAD_BASE` so the app can serve your photos from `UPLOAD_BASE`
-
-```sh
-# if you're on UNIX like systems
-# make sure to execute the following once in the root of your project
-sudo ln -s /var/wwww/images /public/images
-```
-
 ```sh
 # if you're on UNIX like systems
 cp .env.example .env
@@ -54,6 +46,49 @@ to run the app, use
 pnpm dev
 ```
 
-then open localhost:4321.
+then open http://localhost:4321.
 
-Use the `database.sqlite` file as a base.
+### Uploading images
+
+After setting `UPLOAD_BASE`, you can make a symbolic link from `public/images` to `UPLOAD_BASE` so the app can serve your photos from `UPLOAD_BASE`
+
+```sh
+# if you're on UNIX like systems
+# make sure to execute the following once in the root of your project
+# so you can see images in dev mode
+sudo ln -s /storage/public/images /public/images
+```
+
+### Build for prod
+
+If you want to use an optimized version of the app, you can do so with the following commmands
+
+```sh
+pnpm build
+chmod +x ./postbuild.sh && ./postbuild.sh # run postbuild commands
+UPLOAD_BASE=your/upload/base/path node dist/server/entry.mjs # run app in production mode
+```
+
+### Database setup
+
+For a quick start, can use the `example.sqlite` database file as a base. copy it and name it `database.sqlite`
+
+```sh
+cp example.sqlite database.sqlite
+```
+
+From this point on you can use the app as normal.
+
+> [!info] If you want to start from scratch...
+> first create the database file
+>
+> ```sh
+> touch database.sqlite
+> ```
+>
+> to migrate and seed the database, you can run the kysely CLI
+>
+> ```sh
+> pnpm kysely migrate latest
+> pnpm kysely seed run # run seeders
+> ```
