@@ -26,7 +26,6 @@ All commands are run from the root of the project, from a terminal:
 first copy the .env.example file, name it .env. Set the respective variables:
 
 - DATABASE_URL: where your SQLite database file is located. Defaults to `./database.sqlite`
-- UPLOAD_BASE: base to upload your kader images to. set this to whatever you want, I personally set this to `/var/www/images/`.
 
 ```sh
 # if you're on UNIX like systems
@@ -50,13 +49,13 @@ then open http://localhost:4321.
 
 ### Uploading images
 
-After setting `UPLOAD_BASE`, you can make a symbolic link from `public/images` to `UPLOAD_BASE` so the app can serve your photos from `UPLOAD_BASE`
+Before uploading, create a symbolic link from `public/images` to `/base of your app/storage/public/images` so the app can serve your photos
 
 ```sh
 # if you're on UNIX like systems
 # make sure to execute the following once in the root of your project
 # so you can see images in dev mode
-sudo ln -s /storage/public/images /public/images
+sudo ln -s $(pwd)/storage/public/images $(pwd)/public/images
 ```
 
 ### Build for prod
@@ -66,7 +65,7 @@ If you want to use an optimized version of the app, you can do so with the follo
 ```sh
 pnpm build
 chmod +x ./postbuild.sh && ./postbuild.sh # run postbuild commands
-UPLOAD_BASE=your/upload/base/path node dist/server/entry.mjs # run app in production mode
+node dist/server/entry.mjs # run app in production mode
 ```
 
 ### Database setup
@@ -74,14 +73,15 @@ UPLOAD_BASE=your/upload/base/path node dist/server/entry.mjs # run app in produc
 For a quick start, can use the `example.sqlite` database file as a base. copy it and name it `database.sqlite`
 
 ```sh
-cp example.sqlite database.sqlite
+cp template.sqlite database.sqlite
 ```
 
 **Note**: this database was last exported in 2025-12-04. Most students have no groups and to prevent null values I put the default group as _ROC_, you'll have to update them manually
 
 From this point on you can use the app as normal.
 
-> [!info] OR if you want to start from scratch...
+> [!INFO]
+> OR if you want to start from scratch...
 > first create the database file
 >
 > ```sh
