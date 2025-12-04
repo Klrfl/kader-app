@@ -77,7 +77,7 @@ const title = `Kader App | ${student?.name}`;
   {
     student ? (
       <div class="grid grid-cols-2 gap-4 px-4 lg:p-0">
-        <header class="col-span-full lg:col-span-2">
+        <header class="max-lg:col-span-full order-first">
           Editing
           <h1 class="text-2xl">
             {student.name} - {student.nim} ({student.group_name})
@@ -224,6 +224,20 @@ const title = `Kader App | ${student?.name}`;
           </ul>
         )}
 
+        <div
+          class="alert alert-success alert-soft flex justify-between sm:max-lg:col-span-full lg:order-first invisible"
+          id="success-alert"
+        >
+          <p>successfully uploaded image.</p>
+          <button
+            class="btn btn-circle btn-success btn-soft"
+            id="success-alert-close"
+            title="dismiss message"
+          >
+            X
+          </button>
+        </div>
+
         <form
           id="student-image-form"
           method="POST"
@@ -269,10 +283,9 @@ const title = `Kader App | ${student?.name}`;
           </label>
 
           <button
-            class="btn btn-error btn-soft"
-            type="button"
-            id="clear-image"
             data-name="clear-image"
+            class="btn btn-error btn-soft"
+            type="submit"
           >
             Clear
           </button>
@@ -328,13 +341,13 @@ const title = `Kader App | ${student?.name}`;
     }
   });
 
-  function previewImage(newImage: File) {
-    const img = document.getElementById(
-      "student-image"
-    ) as HTMLImageElement | null;
-    if (!img) return console.error("no image element detected");
+  const imgEl = document.getElementById(
+    "student-image"
+  ) as HTMLImageElement | null;
+  if (!imgEl) console.warn("no image element detected");
 
-    img.src = URL.createObjectURL(newImage);
+  function previewImage(newImage: File) {
+    imgEl!.src = URL.createObjectURL(newImage);
   }
 
   function handleDrop(e: DragEvent) {
@@ -374,6 +387,9 @@ const title = `Kader App | ${student?.name}`;
     }
   });
 
+  const successAlertEl = document.getElementById("success-alert");
+  const successDismissBtn = document.getElementById("success-alert-close");
+
   async function uploadImage(formData: FormData) {
     const { error } = await actions.images.uploadStudentImage(formData);
 
@@ -383,7 +399,8 @@ const title = `Kader App | ${student?.name}`;
       return;
     }
 
-    alert("successfully uploaded image");
+    successAlertEl?.classList.remove("invisible");
+    setTimeout(() => successAlertEl?.classList.add("invisible"), 5000);
   }
 
   async function deleteImage(formData: FormData) {
@@ -395,6 +412,12 @@ const title = `Kader App | ${student?.name}`;
       return;
     }
 
+    if (imgEl) imgEl.src = "";
+
     alert("successfully deleted image");
   }
+
+  successDismissBtn?.addEventListener("click", () =>
+    successAlertEl?.classList.add("invisible")
+  );
 </script>
