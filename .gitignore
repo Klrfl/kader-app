@@ -4,4 +4,7 @@ node_modules
 public/images
 dist/
 
-./database.sqlite
+database.sqlite
+# WAL mode things
+database.sqlite-shm
+database.sqlite-wal
