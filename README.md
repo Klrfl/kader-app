@@ -77,7 +77,7 @@ For a quick start, can use the `example.sqlite` database file as a base. copy it
 cp example.sqlite database.sqlite
 ```
 
-**Note**: this database was last exported in 2025-12-04. Most students have no groups, you'll have to update manually
+**Note**: this database was last exported in 2025-12-04. Most students have no groups and to prevent null values I put the default group as _ROC_, you'll have to update them manually
 
 From this point on you can use the app as normal.
 
