@@ -77,9 +77,11 @@ For a quick start, can use the `example.sqlite` database file as a base. copy it
 cp example.sqlite database.sqlite
 ```
 
+**Note**: this database was last exported in 2025-12-04. Most students have no groups, you'll have to update manually
+
 From this point on you can use the app as normal.
 
-> [!info] If you want to start from scratch...
+> [!info] OR if you want to start from scratch...
 > first create the database file
 >
 > ```sh
