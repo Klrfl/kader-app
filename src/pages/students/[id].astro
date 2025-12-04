@@ -143,24 +143,36 @@ const title = `Kader App | ${student?.name}`;
             ))}
           </select>
 
-          <label class="label">Place, date of birth</label>
+          <label for="place_of_birth" class="label">
+            Place of birth
+          </label>
           <input
             type="text"
             class="input w-full"
-            disabled
+            name="place_of_birth"
             value={student.place_of_birth}
           />
 
           <label for="date_of_birth" class="label">
-            Actual date of birth
+            Date of birth
           </label>
-
           <input
             type="date"
             class="input w-full"
             name="date_of_birth"
             id="date_of_birth"
             value={formattedDob}
+          />
+
+          <label for="instagram_handle" class="label">
+            Instagram handle
+          </label>
+          <input
+            type="text"
+            class="input w-full"
+            name="instagram_handle"
+            id="instagram_handle"
+            value={student.instagram_handle}
           />
 
           <label for="address" class="label">

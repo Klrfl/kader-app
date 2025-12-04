@@ -145,10 +145,11 @@ class SQLiteStudentRepository implements StudentRepository {
       .set({
         name: input.name,
         nickname: input.nickname,
-        nim: input.nim,
         blood_type: input.blood_type,
         group_id: input.group_id,
         address: input.address,
+        instagram_handle: input.instagram_handle,
+        place_of_birth: input.place_of_birth,
         date_of_birth: sql`datetime(${input.date_of_birth})`,
         has_bonded_with: Number(input.has_bonded_with),
       })
