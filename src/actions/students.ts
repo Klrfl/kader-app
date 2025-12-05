@@ -15,13 +15,13 @@ export const studentUpdate = defineAction({
     nim: z.string().optional(),
     blood_type: z.string().optional(),
     instagram_handle: z.string().trim().optional(),
+    place_of_birth: z.string().trim().optional(),
     date_of_birth: z.coerce.date().optional(),
     group_id: z.number().int().positive(),
     has_bonded_with: z.coerce.boolean(),
     address: z.string().optional(),
   }),
   handler: async (input) => {
-    // TODO: handle errors
     let parsed_dob = input.date_of_birth
       ? new Date(input.date_of_birth).toISOString()
       : null;
@@ -29,10 +29,11 @@ export const studentUpdate = defineAction({
     const student_data: UpdateableStudent = {
       name: input.name,
       nickname: input.nickname,
-      nim: input.nim,
       blood_type: input.blood_type,
       group_id: input.group_id,
       address: input.address,
+      instagram_handle: input.instagram_handle,
+      place_of_birth: input.place_of_birth,
       date_of_birth: parsed_dob,
       has_bonded_with: Number(input.has_bonded_with),
     };

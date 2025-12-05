@@ -1,4 +1,5 @@
 import { newImageRepo, newStudentRepo } from "@/repositories";
+import { newStorage } from "@/services/storage";
 import type { UpdateableImage } from "@/types";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
@@ -32,10 +33,12 @@ export const uploadStudentImage = defineAction({
 
       newImageData.filename = encodeURIComponent(filename);
 
+      const storage = newStorage("local");
+      storage.upload(input.image, filename);
+
       const { error } = await imageRepo.uploadStudentImage(
-        input.image,
-        filename,
-        student.id
+        student.id,
+        filename
       );
 
       if (error) throw error;
@@ -50,5 +53,23 @@ export const uploadStudentImage = defineAction({
     if (updateError) throw updateError;
 
     return result;
+  },
+});
+
+export const deleteStudentImage = defineAction({
+  accept: "form",
+  input: z.object({
+    student_id: z.number().positive(),
+  }),
+  handler: async ({ student_id }) => {
+    const imageRepo = newImageRepo();
+    const { result, error } = await imageRepo.deleteImage(student_id);
+
+    if (error) throw error;
+
+    const storage = newStorage("local");
+    storage.delete(result?.filename!);
+
+    return { success: true };
   },
 });
