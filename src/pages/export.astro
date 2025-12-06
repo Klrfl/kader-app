@@ -1,0 +1,109 @@
+---
+import { newImageRepo } from "@/repositories/";
+import { Image } from "astro:assets";
+
+const imageRepo = newImageRepo();
+const images = await imageRepo.getImages({
+  showPrinted: false,
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>buku biru</title>
+  </head>
+
+  <body>
+    <ul id="student-list">
+      {
+        images?.map((f) => (
+          <li>
+            <Image
+              class="photo"
+              width={300}
+              height={400}
+              src={`/images/${f.filename}`}
+              alt={f.student_name}
+            />
+          </li>
+        ))
+      }
+    </ul>
+  </body>
+</html>
+
+<style>
+  body {
+    background: white;
+  }
+
+  #student-list {
+    /* class="flex flex-wrap basis-[3cm] shrink-0 grow-1 gap-[0.05cm]" */
+    display: flex;
+    flex-wrap: wrap;
+    flex-basis: 3cm;
+    flex-shrink: 0;
+    flex-grow: 1;
+    gap: 0.05cm;
+
+    margin: 0;
+    padding: 0;
+  }
+
+  #student-list li {
+    margin: 0;
+    display: inline-block;
+    list-style: none;
+    aspect-ratio: 3/4;
+    width: 3cm;
+    height: 4cm;
+  }
+
+  .photo {
+    /* class="inline-block max-w-full w-[3cm] h-[4cm] object-cover" */
+    width: 100%;
+    height: 100%;
+    object-position: center;
+    object-fit: cover;
+  }
+</style>
+
+<script>
+  // import { toJpeg } from "html-to-image";
+  // import pdfmake from "pdfmake/build/pdfmake";
+
+  window.addEventListener("load", async () => {
+    alert(
+      "a PDF file will be downloaded. It will be quite large, so I advise you to immediately go to a compression tool to compress the file."
+    );
+    const list = document.getElementById("student-list");
+
+    if (!list) {
+      return console.warn("no list element detected");
+    }
+
+    window.print();
+
+    // try {
+    //   const dataUrl = await toJpeg(list, { backgroundColor: "white" });
+
+    // pdfmake
+    //   .createPdf({
+    //     pageSize: "a4",
+    //     pageOrientation: "landscape",
+    //     pageMargins: [0, 0, 0, 0],
+    //     content: [{ image: dataUrl, width: [] }],
+    //   })
+    //   .download("buku-biru.pdf");
+    // const anchor = document.createElement("a");
+    // anchor.href = dataUrl;
+    // anchor.target = "_blank";
+    // anchor.download = "buku-biru";
+    //   anchor.click();
+    // } catch (error) {
+    //   console.log("error when generating pdf");
+    //   console.error(error);
+    // }
+  });
+</script>

@@ -30,7 +30,13 @@ const groups = await groupRepo.getGroups();
         )
       }
 
-      <button id="print" class="btn btn-primary">print</button>
+      {
+        images.length && (
+          <a id="print" class="btn btn-primary" href="/export">
+            print
+          </a>
+        )
+      }
     </header>
 
     <form
@@ -91,8 +97,3 @@ const groups = await groupRepo.getGroups();
     margin-block: 0.1rem;
   }
 </style>
-
-<script>
-  const button = document.getElementById("print");
-  button?.addEventListener("click", () => window.print());
-</script>

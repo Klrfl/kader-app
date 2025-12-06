@@ -1,4 +1,5 @@
 ---
+import { Image } from "astro:assets";
 import MainLayout from "@/layouts/MainLayout.astro";
 import { newGroupRepo, newStudentRepo } from "@/repositories/";
 import { formatDate } from "@/utils/index.ts";
@@ -110,7 +111,7 @@ const groups = await newGroupRepo().getGroups();
             >
               <td>{i + 1}</td>
               <td>{s.nim}</td>
-              <td class="max-w-72">
+              <td class="max-w-56">
                 <a
                   class="link link-hover block"
                   href={`/students/${s.id}?redirectTo=${encodeURIComponent(currentUrl.toString())}`}
@@ -119,7 +120,8 @@ const groups = await newGroupRepo().getGroups();
                   {s.nickname && <span class="block">({s.nickname})</span>}
                 </a>
                 {s.image_filename && (
-                  <img
+                  <Image
+                    loading="lazy"
                     class="aspect-square size-16 rounded object-cover"
                     src={`/images/${s.image_filename}`}
                     alt={s.name}
