@@ -12,6 +12,7 @@ export const studentUpdate = defineAction({
 
     name: z.string().trim(),
     nickname: z.string().trim().optional(),
+    hobby: z.string().optional(),
     nim: z.string().optional(),
     blood_type: z.string().optional(),
     instagram_handle: z.string().trim().optional(),
@@ -29,6 +30,7 @@ export const studentUpdate = defineAction({
     const student_data: UpdateableStudent = {
       name: input.name,
       nickname: input.nickname,
+      hobby: input.hobby,
       blood_type: input.blood_type,
       group_id: input.group_id,
       address: input.address,

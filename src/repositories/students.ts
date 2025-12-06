@@ -145,6 +145,7 @@ class SQLiteStudentRepository implements StudentRepository {
       .set({
         name: input.name,
         nickname: input.nickname,
+        hobby: input.hobby,
         blood_type: input.blood_type,
         group_id: input.group_id,
         address: input.address,

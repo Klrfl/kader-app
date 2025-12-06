@@ -1,7 +1,6 @@
 import { AppError } from "@/errors";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { UPLOAD_BASE } from "astro:env/server";
 import { ActionError } from "astro:actions";
 
 interface Storage {
@@ -14,7 +13,7 @@ export class FileSystemStorage implements Storage {
   private UPLOAD_BASE: string;
 
   constructor() {
-    this.UPLOAD_BASE = UPLOAD_BASE;
+    this.UPLOAD_BASE = path.resolve("./storage/public/images/");
   }
 
   normalizeFilename(filename: string): string {

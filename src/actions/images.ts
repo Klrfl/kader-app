@@ -15,6 +15,13 @@ export const uploadStudentImage = defineAction({
   handler: async (input) => {
     const imageRepo = newImageRepo();
 
+    const { result: existingImage, error } = await imageRepo.getImage(
+      input.student_id
+    );
+    if (error) {
+      console.log("no existing image found");
+    }
+
     const newImageData: UpdateableImage = {
       has_been_printed: Number(input.has_been_printed),
     };
@@ -34,6 +41,10 @@ export const uploadStudentImage = defineAction({
       newImageData.filename = encodeURIComponent(filename);
 
       const storage = newStorage("local");
+      if (existingImage !== null) {
+        storage.delete(existingImage.filename!); // TODO: handle error when deleting
+      }
+
       storage.upload(input.image, filename);
 
       const { error } = await imageRepo.uploadStudentImage(
