@@ -1,0 +1,49 @@
+---
+import { Image } from "astro:assets";
+import { newGroupRepo } from "@/repositories/";
+
+const groupRepo = newGroupRepo();
+const groups = await groupRepo.getVerboseGroups();
+---
+
+<ul class="list">
+  {
+    groups.map((group) => (
+      <li>
+        <Image
+          alt={group.name}
+          width={600}
+          height={400}
+          class="image"
+          src={`/images/${group.image_filename}`}
+        />
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .image {
+    width: 6in;
+    height: 4in;
+    object-fit: cover;
+  }
+</style>
+
+<script>
+  window.addEventListener("load", () => {
+    // alert(
+    //   "a PDF file will be downloaded shortly. The resulting file will be quite large, so I advise you to immediately compress it after downloading."
+    // );
+    // window.print();
+  });
+</script>
