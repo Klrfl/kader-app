@@ -1,9 +1,8 @@
 import { db } from "@/database";
 import type { DB } from "@/database/database.types";
 import { AppError } from "@/errors";
-import type { Group } from "@/types";
-import type { Kysely } from "kysely";
-import { sql } from "kysely";
+import type { Group, InsertableGroup } from "@/types";
+import { sql, Kysely } from "kysely";
 
 type VerboseGroup = {
   id: number;
@@ -16,6 +15,7 @@ type VerboseGroup = {
 interface GroupRepository {
   getGroup(id: number): Promise<Group>;
   getGroups(query?: string): Promise<Group[]>;
+  createGroup(data: InsertableGroup): Promise<Group>;
 
   /**
    * get groups with student count and bonding stats
@@ -29,6 +29,23 @@ class SQLiteGroupRepository implements GroupRepository {
   constructor(db: Kysely<DB>) {
     this.db = db;
   }
+  async createGroup(data: InsertableGroup): Promise<Group> {
+    const result = await this.db
+      .insertInto("groups")
+      .values(data)
+      .returningAll()
+      .executeTakeFirst();
+
+    if (!result) {
+      throw new AppError(
+        "failed when creating new group",
+        "GROUP_INSERT_ERROR"
+      );
+    }
+
+    return result;
+  }
+
   async getVerboseGroups(): Promise<VerboseGroup[]> {
     const query = this.db
       .with("bonded", (qb) =>

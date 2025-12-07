@@ -1,46 +1,74 @@
 ---
 import MainLayout from "@/layouts/MainLayout.astro";
 import { newGroupRepo } from "@/repositories/";
+import { actions } from "astro:actions";
 
 const groups = await newGroupRepo().getVerboseGroups();
+
+const result = Astro.getActionResult(actions.groups.create);
+
+if (result && !result.error) {
+  return Astro.redirect("/groups");
+}
 ---
 
 <MainLayout>
-  <header class="py-4">
-    <h1 class="text-2xl">Groups</h1>
-  </header>
+  <article class="grid gap-8 grid-cols-3">
+    <header>
+      <h1 class="text-2xl">Groups</h1>
+      <p>Showing {groups.length} groups.</p>
+    </header>
 
-  <ul class="grid grid-cols-2 lg:grid-cols-3 gap-4">
-    {
-      groups.map((group) => (
-        <li
-          class:list={[
-            "rounded border px-6 py-4",
-            {
-              "bg-red-700/30 border-red-700": group.percentage < 30,
-            },
-            {
-              "bg-amber-700/30 border-amber-700": group.percentage > 30,
-            },
-            {
-              "bg-green-700/30 border-green-700": group.percentage === 100,
-            },
-            {
-              "border-base-content/30": group.percentage < 100,
-            },
-          ]}
-        >
-          <article>
-            <h2 class="text-xl">
-              <a class="link-hover" href={`/students/?group=${group.name}`}>
-                {group.name}
-              </a>
-            </h2>
-            (bonded with {group.bonded_count} out of {group.student_count},{" "}
-            {group.percentage}% progress)
-          </article>
-        </li>
-      ))
-    }
-  </ul>
+    <form
+      action={actions.groups.create}
+      class="flex flex-col gap-4 border-2 border-base-content/20 px-6 py-4 rounded col-end-[-1]"
+      method="post"
+    >
+      <label for="name">Name</label>
+      <input
+        type="text"
+        name="name"
+        id="name"
+        class="input w-full"
+        placeholder="name of the group"
+        required
+      />
+
+      <button type="submit" class="btn btn-primary">Create new group</button>
+    </form>
+
+    <ul class="grid grid-cols-2 lg:grid-cols-3 gap-4 col-span-full">
+      {
+        groups.map((group) => (
+          <li
+            class:list={[
+              "rounded border px-6 py-4",
+              {
+                "bg-red-700/30 border-red-700": group.percentage < 30,
+              },
+              {
+                "bg-amber-700/30 border-amber-700": group.percentage > 30,
+              },
+              {
+                "bg-green-700/30 border-green-700": group.percentage === 100,
+              },
+              {
+                "border-base-content/30": group.percentage < 100,
+              },
+            ]}
+          >
+            <article>
+              <h2 class="text-xl">
+                <a class="link-hover" href={`/students/?group=${group.name}`}>
+                  {group.name}
+                </a>
+              </h2>
+              (bonded with {group.bonded_count} out of {group.student_count},{" "}
+              {group.percentage}% progress)
+            </article>
+          </li>
+        ))
+      }
+    </ul>
+  </article>
 </MainLayout>
