@@ -8,6 +8,7 @@ import { AppError } from "@/errors";
 type getImagesParams = {
   groupId?: number;
   showPrinted?: boolean;
+  sortByNIM?: boolean;
 };
 
 type VerboseImage = Image & {
@@ -82,23 +83,44 @@ export class SQLiteImageRepo implements ImageRepository {
 
   async getImages({
     groupId = 0,
-    showPrinted,
+    showPrinted, sortByNIM,
   }: getImagesParams): Promise<VerboseImage[]> {
-    let query = this.db
-      .selectFrom("images as i")
-      .leftJoin("students as s", "s.id", "i.student_id")
-      .leftJoin("groups as g", "g.id", "s.group_id")
-      .select([
-        "i.id",
-        "i.student_id",
-        "i.filename",
-        "i.created_at",
-        "i.has_been_printed",
-        "s.nickname as student_name",
-        "g.name as group_name",
-      ])
-      .orderBy("s.group_id", "asc")
-      .orderBy("s.nim", "asc");
+    let query;
+
+    if (!sortByNIM){
+      query = this.db
+        .selectFrom("images as i")
+        .leftJoin("students as s", "s.id", "i.student_id")
+        .leftJoin("groups as g", "g.id", "s.group_id")
+        .select([
+          "i.id",
+          "i.student_id",
+          "i.filename",
+          "i.created_at",
+          "i.has_been_printed",
+          "s.nickname as student_name",
+          "g.name as group_name",
+        ])
+        .orderBy("s.group_id", "asc")
+        .orderBy("s.nim", "asc");
+    } else {
+      query = this.db
+        .selectFrom("images as i")
+        .leftJoin("students as s", "s.id", "i.student_id")
+        .leftJoin("groups as g", "g.id", "s.group_id")
+        .select([
+          "i.id",
+          "i.student_id",
+          "i.filename",
+          "i.created_at",
+          "i.has_been_printed",
+          "s.nickname as student_name",
+          "g.name as group_name",
+        ])
+        // .orderBy("s.group_id", "asc")
+        .orderBy("s.nim", "asc");
+    }
+    
     if (groupId !== 0) {
       query = query.where("g.id", "=", groupId);
     }

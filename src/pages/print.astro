@@ -8,11 +8,12 @@ import { newImageRepo, newGroupRepo } from "@/repositories/";
 const searchParams = new URL(Astro.url).searchParams;
 const groupToFilterBy = Number(searchParams.get("group") ?? 0);
 const showPrinted = Boolean(searchParams.get("show_printed"));
+const sortByNIM = Boolean(searchParams.get("sort_by_nim"));
 
 const imageRepo = newImageRepo();
 const images = await imageRepo.getImages({
   groupId: groupToFilterBy,
-  showPrinted,
+  showPrinted, sortByNIM,
 });
 
 const groupRepo = newGroupRepo();
@@ -65,6 +66,14 @@ const groups = await groupRepo.getGroups();
         class="checkbox peer"
         name="show_printed"
         checked={showPrinted}
+      />
+
+      <label for="sort_by_nim" class="label">Sort pictures only by NIM?</label>
+      <input
+        type="checkbox"
+        class="checkbox peer"
+        name="sort_by_nim"
+        checked={sortByNIM}
       />
       <!-- <span class="hidden peer-checked:block">Yes</span> -->
       <!-- <span class="peer-checked:hidden">No</span> -->
