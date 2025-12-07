@@ -1,3 +1,4 @@
+import { groupCreate } from "./groups";
 import { deleteStudentImage, markPrinted, uploadStudentImage } from "./images";
 import { studentCreate, studentDelete, studentUpdate } from "./students";
 
@@ -11,5 +12,8 @@ export const server = {
     update: studentUpdate,
     create: studentCreate,
     delete: studentDelete,
+  },
+  groups: {
+    create: groupCreate,
   },
 };
