@@ -45,6 +45,7 @@ interface ImageRepository {
     filename: string
   ): Promise<UploadImageResult>;
   deleteImage(student_id: number): Promise<DeleteImageResult>;
+  markImagesAsPrinted(student_ids: number[]): Promise<boolean>;
 }
 
 export class SQLiteImageRepo implements ImageRepository {
@@ -52,6 +53,16 @@ export class SQLiteImageRepo implements ImageRepository {
 
   constructor(db: Kysely<DB>) {
     this.db = db;
+  }
+  async markImagesAsPrinted(student_ids: number[]): Promise<boolean> {
+    // TODO: handle errors
+    const _ = await this.db
+      .updateTable("images")
+      .set({ has_been_printed: Number(true) })
+      .where("student_id", "in", student_ids)
+      .execute();
+
+    return true;
   }
 
   async deleteImage(student_id: number): Promise<DeleteImageResult> {

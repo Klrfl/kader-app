@@ -84,3 +84,16 @@ export const deleteStudentImage = defineAction({
     return { success: true };
   },
 });
+
+export const markPrinted = defineAction({
+  accept: "form",
+  input: z.object({
+    student: z.array(z.coerce.number().positive()),
+  }),
+  handler: ({ student: students }) => {
+    const imageRepo = newImageRepo();
+    imageRepo.markImagesAsPrinted(students);
+
+    return { success: true };
+  },
+});
