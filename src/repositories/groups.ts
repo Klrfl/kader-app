@@ -86,6 +86,7 @@ class SQLiteGroupRepository implements GroupRepository {
         ),
         "gi.filename as image_filename",
       ])
+      .where("g.name", "not like", "None")
       .orderBy("g.name", "asc");
 
     const results = await query.execute();
