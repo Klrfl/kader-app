@@ -1,4 +1,4 @@
-import { groupCreate } from "./groups";
+import { groupCreate, groupUploadImage } from "./groups";
 import { deleteStudentImage, markPrinted, uploadStudentImage } from "./images";
 import { studentCreate, studentDelete, studentUpdate } from "./students";
 
@@ -15,5 +15,6 @@ export const server = {
   },
   groups: {
     create: groupCreate,
+    uploadImage: groupUploadImage,
   },
 };
