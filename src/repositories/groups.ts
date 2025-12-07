@@ -1,7 +1,7 @@
 import { db } from "@/database";
 import type { DB } from "@/database/database.types";
 import { AppError } from "@/errors";
-import type { Group, InsertableGroup } from "@/types";
+import type { Group, GroupImage, InsertableGroup } from "@/types";
 import { sql, Kysely } from "kysely";
 
 type VerboseGroup = {
@@ -10,6 +10,7 @@ type VerboseGroup = {
   student_count: number;
   bonded_count: number;
   percentage: number;
+  image_filename: string | null;
 };
 
 interface GroupRepository {
@@ -18,9 +19,10 @@ interface GroupRepository {
   createGroup(data: InsertableGroup): Promise<Group>;
 
   /**
-   * get groups with student count and bonding stats
+   * get groups with image, student count, and bonding stats
    * */
   getVerboseGroups(): Promise<VerboseGroup[]>;
+  uploadImage(group_id: number, filename: string): Promise<GroupImage>;
 }
 
 class SQLiteGroupRepository implements GroupRepository {
@@ -29,6 +31,7 @@ class SQLiteGroupRepository implements GroupRepository {
   constructor(db: Kysely<DB>) {
     this.db = db;
   }
+
   async createGroup(data: InsertableGroup): Promise<Group> {
     const result = await this.db
       .insertInto("groups")
@@ -72,6 +75,7 @@ class SQLiteGroupRepository implements GroupRepository {
       .selectFrom("groups as g")
       .leftJoin("no_bonded", "g.id", "no_bonded.group_id")
       .leftJoin("bonded", "g.id", "bonded.group_id")
+      .leftJoin("group_images as gi", "gi.group_id", "g.id")
       .select(({ fn, lit }) => [
         "g.id",
         "g.name",
@@ -80,6 +84,7 @@ class SQLiteGroupRepository implements GroupRepository {
         sql<number>`coalesce(100 * bonded.bonded_count / no_bonded.total_count, 0)`.as(
           "percentage"
         ),
+        "gi.filename as image_filename",
       ])
       .orderBy("g.name", "asc");
 
@@ -113,6 +118,26 @@ class SQLiteGroupRepository implements GroupRepository {
 
     const groups = await query.execute();
     return groups;
+  }
+
+  async uploadImage(group_id: number, filename: string): Promise<GroupImage> {
+    const groupImage = await this.db
+      .insertInto("group_images")
+      .values({ group_id: group_id, filename: filename })
+      .onConflict((oc) =>
+        oc.doUpdateSet({ group_id: group_id, filename: filename })
+      )
+      .returningAll()
+      .executeTakeFirst();
+
+    if (!groupImage) {
+      throw new AppError(
+        "failed when uploading group image",
+        "GROUP_IMAGE_UPSERT_ERROR"
+      );
+    }
+
+    return groupImage;
   }
 }
 

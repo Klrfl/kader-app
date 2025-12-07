@@ -2,13 +2,21 @@
 import MainLayout from "@/layouts/MainLayout.astro";
 import { newGroupRepo } from "@/repositories/";
 import { actions } from "astro:actions";
+import { Image } from "astro:assets";
 
 const groups = await newGroupRepo().getVerboseGroups();
 
-const result = Astro.getActionResult(actions.groups.create);
+const createResult = Astro.getActionResult(actions.groups.create);
+if (createResult) {
+  if (!createResult.error) return Astro.redirect("/groups");
+  else console.error(createResult.error);
+}
 
-if (result && !result.error) {
-  return Astro.redirect("/groups");
+// TODO: handle upload errors
+const uploadResult = Astro.getActionResult(actions.groups.uploadImage);
+if (uploadResult) {
+  if (!uploadResult.error) return Astro.redirect("/groups");
+  else console.error(uploadResult.error);
 }
 ---
 
@@ -57,15 +65,48 @@ if (result && !result.error) {
               },
             ]}
           >
-            <article>
-              <h2 class="text-xl">
-                <a class="link-hover" href={`/students/?group=${group.name}`}>
-                  {group.name}
-                </a>
-              </h2>
-              (bonded with {group.bonded_count} out of {group.student_count},{" "}
-              {group.percentage}% progress)
-            </article>
+            <details>
+              <summary class="cursor-pointer">
+                <h2 class="text-xl">
+                  <a class="link-hover" href={`/students/?group=${group.name}`}>
+                    {group.name}
+                  </a>
+                </h2>
+                (bonded with {group.bonded_count} out of {group.student_count},{" "}
+                {group.percentage}% progress)
+                {group.image_filename && (
+                  <Image
+                    alt={group.name}
+                    src={`/images/${group.image_filename}`}
+                    width={400}
+                    height={600}
+                    class="w-[6in] h-[4in] object-cover"
+                  />
+                )}
+              </summary>
+
+              <form
+                action={actions.groups.uploadImage}
+                method="post"
+                class="flex flex-col gap-4 border-2 border-base-content/20 p-4"
+                enctype="multipart/form-data"
+              >
+                <label for="image">Image</label>
+                <input type="hidden" name="group_id" value={group.id} />
+                <input
+                  type="file"
+                  class="file-input w-full"
+                  id="image"
+                  name="image"
+                  accept="image/*"
+                  required
+                />
+
+                <button type="submit" class="btn btn-primary">
+                  Upload image
+                </button>
+              </form>
+            </details>
           </li>
         ))
       }
