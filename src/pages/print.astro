@@ -1,6 +1,7 @@
 ---
 import MainLayout from "@/layouts/MainLayout.astro";
 import { Image } from "astro:assets";
+import { actions } from "astro:actions";
 
 import { newImageRepo, newGroupRepo } from "@/repositories/";
 
@@ -30,7 +31,13 @@ const groups = await groupRepo.getGroups();
         )
       }
 
-      <button id="print" class="btn btn-primary">print</button>
+      {
+        images.length && (
+          <a id="print" class="btn btn-primary" href="/export">
+            print
+          </a>
+        )
+      }
     </header>
 
     <form
@@ -65,34 +72,45 @@ const groups = await groupRepo.getGroups();
       <button class="btn" type="submit" class="col-end-3">submit</button>
     </form>
 
-    <ul class="flex flex-wrap basis-[3cm] shrink-0 grow-1 gap-[0.05cm]">
+    <form
+      action={actions.images.markPrinted}
+      method="post"
+      class="flex flex-wrap gap-4"
+    >
       {
         images?.map((f) => (
-          <li class="inline-block relative">
+          <label
+            for={String(f.student_id)}
+            class="inline-block relative w-[3cm] h-[4cm] cursor-pointer"
+          >
+            <span class="text-sm bg-black/80 flex justify-between">
+              {f.student_name} <br /> {f.group_name}
+              <input
+                id={String(f.student_id)}
+                type="checkbox"
+                class="checkbox"
+                name="student"
+                value={String(f.student_id)}
+              />
+            </span>
             <Image
               width={300}
               height={400}
               src={`/images/${f.filename}`}
               alt={f.student_name}
-              class="inline-block max-w-full w-[3cm] h-[4cm] object-cover"
+              class="absolute inset-0 z-[-1] size-full object-cover"
             />
-            <p class="print:hidden text-sm absolute bottom-0 left-0 right-0 bg-black/70">
-              {f.student_name} - {f.group_name}
-            </p>
-          </li>
+          </label>
         ))
       }
-    </ul>
+      <div class="order-first w-full">
+        <button type="button" class="btn btn-danger btn-soft"
+          >Mark all as printed</button
+        >
+        <button type="submit" class="btn btn-primary"
+          >Mark selected pictures as printed</button
+        >
+      </div>
+    </form>
   </article>
 </MainLayout>
-
-<style>
-  .photo {
-    margin-block: 0.1rem;
-  }
-</style>
-
-<script>
-  const button = document.getElementById("print");
-  button?.addEventListener("click", () => window.print());
-</script>

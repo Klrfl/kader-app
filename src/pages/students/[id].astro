@@ -77,7 +77,7 @@ const title = `Kader App | ${student?.name}`;
   {
     student ? (
       <div class="grid grid-cols-2 gap-4 px-4 lg:p-0">
-        <header class="col-span-full lg:col-span-2">
+        <header class="max-lg:col-span-full order-first">
           Editing
           <h1 class="text-2xl">
             {student.name} - {student.nim} ({student.group_name})
@@ -143,24 +143,36 @@ const title = `Kader App | ${student?.name}`;
             ))}
           </select>
 
-          <label class="label">Place, date of birth</label>
+          <label for="place_of_birth" class="label">
+            Place of birth
+          </label>
           <input
             type="text"
             class="input w-full"
-            disabled
+            name="place_of_birth"
             value={student.place_of_birth}
           />
 
           <label for="date_of_birth" class="label">
-            Actual date of birth
+            Date of birth
           </label>
-
           <input
             type="date"
             class="input w-full"
             name="date_of_birth"
             id="date_of_birth"
             value={formattedDob}
+          />
+
+          <label for="instagram_handle" class="label">
+            Instagram handle
+          </label>
+          <input
+            type="text"
+            class="input w-full"
+            name="instagram_handle"
+            id="instagram_handle"
+            value={student.instagram_handle}
           />
 
           <label for="address" class="label">
@@ -212,8 +224,22 @@ const title = `Kader App | ${student?.name}`;
           </ul>
         )}
 
+        <div
+          class="alert alert-success flex justify-between sm:max-lg:col-span-full lg:order-first invisible fixed left-0 top-0 m-8 text-lg"
+          id="success-alert"
+        >
+          <p>successfully uploaded image.</p>
+          <button
+            class="btn btn-circle btn-success btn-soft"
+            id="success-alert-close"
+            title="dismiss message"
+          >
+            X
+          </button>
+        </div>
+
         <form
-          action={actions.images.uploadStudentImage}
+          id="student-image-form"
           method="POST"
           enctype="multipart/form-data"
           class="grid gap-4 lg:grid-cols-[15rem_1fr] col-span-full lg:col-span-1"
@@ -257,13 +283,17 @@ const title = `Kader App | ${student?.name}`;
           </label>
 
           <button
+            data-name="clear-image"
             class="btn btn-error btn-soft"
-            type="button"
-            id="clear-student-image"
+            type="submit"
           >
             Clear
           </button>
-          <button class="btn btn-primary btn-soft" type="submit">
+          <button
+            data-name="update-image"
+            class="btn btn-primary btn-soft"
+            type="submit"
+          >
             Update/Upload
           </button>
         </form>
@@ -296,6 +326,8 @@ const title = `Kader App | ${student?.name}`;
 </MainLayout>
 
 <script>
+  import { actions } from "astro:actions";
+
   // the file input IS the dropzone
   const imageInputEl = document.getElementById(
     "image"
@@ -309,13 +341,13 @@ const title = `Kader App | ${student?.name}`;
     }
   });
 
-  function previewImage(newImage: File) {
-    const img = document.getElementById(
-      "student-image"
-    ) as HTMLImageElement | null;
-    if (!img) return console.error("no image element detected");
+  const imgEl = document.getElementById(
+    "student-image"
+  ) as HTMLImageElement | null;
+  if (!imgEl) console.warn("no image element detected");
 
-    img.src = URL.createObjectURL(newImage);
+  function previewImage(newImage: File) {
+    imgEl!.src = URL.createObjectURL(newImage);
   }
 
   function handleDrop(e: DragEvent) {
@@ -328,4 +360,64 @@ const title = `Kader App | ${student?.name}`;
 
     if (newImage) previewImage(newImage);
   }
+
+  const studentImageForm = document.getElementById(
+    "student-image-form"
+  ) as HTMLFormElement | null;
+
+  studentImageForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(studentImageForm);
+    const submitter = e.submitter;
+
+    switch (submitter?.dataset.name) {
+      case "update-image": {
+        await uploadImage(formData);
+        break;
+      }
+
+      case "clear-image": {
+        await deleteImage(formData);
+        break;
+      }
+
+      default:
+        console.log("what do I do now");
+    }
+  });
+
+  const successAlertEl = document.getElementById("success-alert");
+  const successDismissBtn = document.getElementById("success-alert-close");
+
+  async function uploadImage(formData: FormData) {
+    const { error } = await actions.images.uploadStudentImage(formData);
+
+    if (error) {
+      console.error(error);
+      alert("error when uploading image");
+      return;
+    }
+
+    successAlertEl?.classList.remove("invisible");
+    setTimeout(() => successAlertEl?.classList.add("invisible"), 5000);
+  }
+
+  async function deleteImage(formData: FormData) {
+    const { error } = await actions.images.deleteStudentImage(formData);
+
+    if (error) {
+      console.error(error);
+      alert("error when deleting image");
+      return;
+    }
+
+    if (imgEl) imgEl.src = "";
+
+    alert("successfully deleted image");
+  }
+
+  successDismissBtn?.addEventListener("click", () =>
+    successAlertEl?.classList.add("invisible")
+  );
 </script>

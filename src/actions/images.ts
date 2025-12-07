@@ -1,4 +1,5 @@
 import { newImageRepo, newStudentRepo } from "@/repositories";
+import { newStorage } from "@/services/storage";
 import type { UpdateableImage } from "@/types";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
@@ -13,6 +14,13 @@ export const uploadStudentImage = defineAction({
 
   handler: async (input) => {
     const imageRepo = newImageRepo();
+
+    const { result: existingImage, error } = await imageRepo.getImage(
+      input.student_id
+    );
+    if (error) {
+      console.log("no existing image found");
+    }
 
     const newImageData: UpdateableImage = {
       has_been_printed: Number(input.has_been_printed),
@@ -32,10 +40,16 @@ export const uploadStudentImage = defineAction({
 
       newImageData.filename = encodeURIComponent(filename);
 
+      const storage = newStorage("local");
+      if (existingImage !== null) {
+        storage.delete(existingImage.filename!); // TODO: handle error when deleting
+      }
+
+      storage.upload(input.image, filename);
+
       const { error } = await imageRepo.uploadStudentImage(
-        input.image,
-        filename,
-        student.id
+        student.id,
+        filename
       );
 
       if (error) throw error;
@@ -50,5 +64,36 @@ export const uploadStudentImage = defineAction({
     if (updateError) throw updateError;
 
     return result;
+  },
+});
+
+export const deleteStudentImage = defineAction({
+  accept: "form",
+  input: z.object({
+    student_id: z.number().positive(),
+  }),
+  handler: async ({ student_id }) => {
+    const imageRepo = newImageRepo();
+    const { result, error } = await imageRepo.deleteImage(student_id);
+
+    if (error) throw error;
+
+    const storage = newStorage("local");
+    storage.delete(result?.filename!);
+
+    return { success: true };
+  },
+});
+
+export const markPrinted = defineAction({
+  accept: "form",
+  input: z.object({
+    student: z.array(z.coerce.number().positive()),
+  }),
+  handler: ({ student: students }) => {
+    const imageRepo = newImageRepo();
+    imageRepo.markImagesAsPrinted(students);
+
+    return { success: true };
   },
 });
