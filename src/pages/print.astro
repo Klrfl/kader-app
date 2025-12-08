@@ -21,12 +21,23 @@ const images = await imageRepo.getImages({
 
 const groupRepo = newGroupRepo();
 const groups = await groupRepo.getGroups();
+
+const markAsPrintedResult = Astro.getActionResult(actions.images.markPrinted);
+
+if (markAsPrintedResult) {
+  if (!markAsPrintedResult.error) {
+    return Astro.redirect("/print");
+  } else {
+    console.error(markAsPrintedResult.error);
+    console.error("there was an error");
+  }
+}
 ---
 
 <MainLayout title="Kader App | Print">
-  <article>
-    <header class="print:hidden">
-      <h1>Print</h1>
+  <article class="grid grid-cols-6">
+    <header class="print:hidden col-span-full lg:col-span-3">
+      <h1 class="text-2xl">Print</h1>
       {
         images.length ? (
           <p>Showing {images.length} photos</p>
@@ -46,11 +57,11 @@ const groups = await groupRepo.getGroups();
 
     <form
       method="get"
-      class="print:hidden grid grid-cols-2 gap-4 outline-2 dark:outline-slate-500 px-6 py-4 my-4"
+      class="print:hidden grid grid-cols-2 gap-4 outline-2 dark:outline-slate-500 px-6 py-4 my-4 col-span-full lg:col-span-3"
     >
-      <label class="label" for="group"
-        >Choose group to display, select none to display all</label
-      >
+      <label class="label" for="group">
+        Choose group to display, select none to display all
+      </label>
 
       <select id="group" name="group" class="select">
         <option value="">None</option>
@@ -97,20 +108,21 @@ const groups = await groupRepo.getGroups();
     <form
       action={actions.images.markPrinted}
       method="post"
-      class="flex flex-wrap gap-4"
+      class="flex flex-wrap gap-4 col-span-full"
     >
       {
         images?.map((f) => (
           <label
             for={String(f.student_id)}
-            class="inline-block relative w-[3cm] h-[4cm] cursor-pointer"
+            class="inline-block relative w-[3cm] h-[4cm] cursor-pointer outline-2 outline-transparent has-[input:checked]:outline-blue-500 transition-colors"
           >
-            <span class="text-sm bg-black/80 flex justify-between">
+            <div class="absolute inset-0 overlay hover:bg-white/20 transition-colors" />
+            <span class="absolute inset-0 top-auto px-2 py-1 text-sm text-white bg-black/80 flex justify-between">
               {f.student_name} <br /> {f.group_name}
               <input
                 id={String(f.student_id)}
                 type="checkbox"
-                class="checkbox"
+                class="checkbox text-white"
                 name="student"
                 value={String(f.student_id)}
               />
@@ -120,18 +132,18 @@ const groups = await groupRepo.getGroups();
               height={400}
               src={`/images/${f.filename}`}
               alt={f.student_name}
-              class="absolute inset-0 z-[-1] size-full object-cover"
+              class="z-[-1] size-full object-cover"
             />
           </label>
         ))
       }
       <div class="order-first w-full">
-        <button type="button" class="btn btn-danger btn-soft"
-          >Mark all as printed</button
-        >
-        <button type="submit" class="btn btn-primary"
-          >Mark selected pictures as printed</button
-        >
+        <button type="button" class="btn btn-danger btn-soft">
+          Mark all as printed
+        </button>
+        <button type="submit" class="btn btn-primary">
+          Mark selected pictures as printed
+        </button>
       </div>
     </form>
   </article>
