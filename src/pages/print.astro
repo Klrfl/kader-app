@@ -9,11 +9,14 @@ const searchParams = new URL(Astro.url).searchParams;
 const groupToFilterBy = Number(searchParams.get("group") ?? 0);
 const showPrinted = Boolean(searchParams.get("show_printed"));
 const sortByNIM = Boolean(searchParams.get("sort_by_nim"));
+const sortByGroup = Boolean(searchParams.get("sort_by_group"));
 
 const imageRepo = newImageRepo();
 const images = await imageRepo.getImages({
   groupId: groupToFilterBy,
-  showPrinted, sortByNIM,
+  showPrinted,
+  sortByNIM,
+  sortByGroup,
 });
 
 const groupRepo = newGroupRepo();
@@ -63,22 +66,32 @@ const groups = await groupRepo.getGroups();
       <label for="show_printed" class="label">Show printed pictures too?</label>
       <input
         type="checkbox"
-        class="checkbox peer"
+        class="checkbox"
         name="show_printed"
         checked={showPrinted}
       />
 
-      <label for="sort_by_nim" class="label">Sort pictures only by NIM?</label>
+      <label for="sort_by_nim" class="label">Sort pictures by NIM?</label>
       <input
         type="checkbox"
-        class="checkbox peer"
+        class="checkbox"
         name="sort_by_nim"
         checked={sortByNIM}
+      />
+
+      <label for="sort_by_nim" class="label">Sort pictures by Group?</label>
+      <input
+        type="checkbox"
+        class="checkbox"
+        name="sort_by_group"
+        checked={sortByGroup}
       />
       <!-- <span class="hidden peer-checked:block">Yes</span> -->
       <!-- <span class="peer-checked:hidden">No</span> -->
 
-      <button class="btn" type="submit" class="col-end-3">submit</button>
+      <button class="btn btn-primary btn-soft" type="submit" class="col-end-3">
+        submit
+      </button>
     </form>
 
     <form
