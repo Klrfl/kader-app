@@ -17,6 +17,7 @@ export default defineConfig({
         context: "server",
         access: "secret",
         optional: false,
+        default: "./database.sqlite",
       }),
     },
   },
@@ -31,4 +32,5 @@ export default defineConfig({
   adapter: node({
     mode: "standalone",
   }),
+  site: "https://kader.munthe.dev",
 });
