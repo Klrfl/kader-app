@@ -8,6 +8,8 @@ import { AppError } from "@/errors";
 type getImagesParams = {
   groupId?: number;
   showPrinted?: boolean;
+  sortByNIM?: boolean;
+  sortByGroup?: boolean;
 };
 
 type VerboseImage = Image & {
@@ -83,6 +85,8 @@ export class SQLiteImageRepo implements ImageRepository {
   async getImages({
     groupId = 0,
     showPrinted,
+    sortByNIM,
+    sortByGroup,
   }: getImagesParams): Promise<VerboseImage[]> {
     let query = this.db
       .selectFrom("images as i")
@@ -96,9 +100,16 @@ export class SQLiteImageRepo implements ImageRepository {
         "i.has_been_printed",
         "s.nickname as student_name",
         "g.name as group_name",
-      ])
-      .orderBy("s.group_id", "asc")
-      .orderBy("s.nim", "asc");
+      ]);
+
+    if (sortByGroup) {
+      query = query.orderBy("s.group_id", "asc");
+    }
+
+    if (sortByNIM) {
+      query = query.orderBy("s.nim", "asc");
+    }
+
     if (groupId !== 0) {
       query = query.where("g.id", "=", groupId);
     }

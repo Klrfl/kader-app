@@ -5,6 +5,7 @@ import { Image } from "astro:assets";
 const imageRepo = newImageRepo();
 const images = await imageRepo.getImages({
   showPrinted: false,
+  sortByNIM: false,
 });
 ---
 
