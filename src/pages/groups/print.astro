@@ -6,44 +6,64 @@ const groupRepo = newGroupRepo();
 const groups = await groupRepo.getVerboseGroups();
 ---
 
-<ul class="list">
-  {
-    groups.map((group) => (
-      <li>
-        <Image
-          alt={group.name}
-          width={600}
-          height={400}
-          class="image"
-          src={`/images/${group.image_filename}`}
-        />
-      </li>
-    ))
-  }
-</ul>
+<!doctype html>
+<html lang="id">
+  <head>
+    <title>Buku biru - kelompok</title>
+  </head>
+
+  <body>
+    <ul class="list">
+      {
+        groups.map((group) => (
+          <li>
+            <Image
+              alt={group.name}
+              width={600}
+              height={400}
+              class="image"
+              src={`/images/${group.image_filename}`}
+            />
+          </li>
+        ))
+      }
+    </ul>
+  </body>
+</html>
 
 <style>
+  body {
+    margin: 0;
+  }
+
   .list {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 0.1rem;
     list-style: none;
     margin: 0;
     padding: 0;
   }
 
-  .image {
+  .list li {
+    display: block;
     width: 6in;
     height: 4in;
+  }
+
+  .image {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
+    object-position: center;
   }
 </style>
 
 <script>
   window.addEventListener("load", () => {
-    // alert(
-    //   "a PDF file will be downloaded shortly. The resulting file will be quite large, so I advise you to immediately compress it after downloading."
-    // );
-    // window.print();
+    alert(
+      "a PDF file will be downloaded shortly. The resulting file will be quite large, so I advise you to immediately compress it after downloading."
+    );
+    window.print();
   });
 </script>
