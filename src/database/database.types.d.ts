@@ -5,10 +5,17 @@
 
 import type { ColumnType } from "kysely";
 
-export type Generated<T> =
-  T extends ColumnType<infer S, infer I, infer U>
-    ? ColumnType<S, I | undefined, U>
-    : ColumnType<T, T | undefined, T>;
+export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
+  ? ColumnType<S, I | undefined, U>
+  : ColumnType<T, T | undefined, T>;
+
+export interface GroupImages {
+  created_at: Generated<string>;
+  filename: string;
+  group_id: number;
+  has_been_printed: Generated<number>;
+  id: Generated<number>;
+}
 
 export interface Groups {
   id: Generated<number>;
@@ -39,6 +46,7 @@ export interface Students {
 }
 
 export interface DB {
+  group_images: GroupImages;
   groups: Groups;
   images: Images;
   students: Students;
