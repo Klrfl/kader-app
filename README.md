@@ -48,8 +48,15 @@ pnpm dev
 then open http://localhost:4321.
 
 ### Uploading images
-
 Before uploading, create a symbolic link from `public/images` to `/base of your app/storage/public/images` so the app can serve your photos
+
+uploading images for windows(use this command)
+
+```sh
+mklink /d C:\Users\user1\path_to\kader-app\public\images C:\Users\user1\path_to\kader-app\storage\public\images
+```
+
+upoading images for linux(use this command)
 
 ```sh
 # if you're on UNIX like systems
