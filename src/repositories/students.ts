@@ -14,6 +14,8 @@ type getVerboseStudentsParams = {
   nim?: string | null;
   groupName?: string | null;
   withTrashed?: boolean;
+  showPrinted?: "printed" | "not_printed";
+  showBondedOnly?: boolean;
 };
 
 interface StudentRepository {
@@ -83,6 +85,8 @@ class SQLiteStudentRepository implements StudentRepository {
     nim,
     groupName,
     withTrashed = false,
+    showPrinted,
+    showBondedOnly,
   }: getVerboseStudentsParams): Promise<VerboseStudent[]> {
     let dbQuery = this.db
       .selectFrom("students as s")
@@ -110,6 +114,16 @@ class SQLiteStudentRepository implements StudentRepository {
 
     if (!withTrashed) {
       dbQuery = dbQuery.where("deleted_at", "is", null);
+    }
+
+    if (showBondedOnly !== undefined) {
+      dbQuery = dbQuery.where("s.has_bonded_with", "=", Number(showBondedOnly));
+    }
+
+    if (showPrinted === "printed") {
+      dbQuery = dbQuery.where("i.has_been_printed", "=", Number(true));
+    } else if (showPrinted === "not_printed") {
+      dbQuery = dbQuery.where("i.has_been_printed", "=", Number(false));
     }
 
     if (q) {
