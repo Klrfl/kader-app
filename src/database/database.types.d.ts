@@ -34,6 +34,7 @@ export interface Students {
   address: string | null;
   blood_type: string | null;
   date_of_birth: string | null;
+  deleted_at: string | null;
   group_id: number;
   has_bonded_with: Generated<number | null>;
   hobby: string | null;

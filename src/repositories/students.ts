@@ -1,6 +1,6 @@
 import { db } from "@/database";
 import type { DB } from "@/database/database.types";
-import { sql, type Kysely, type Updateable } from "kysely";
+import { sql, UpdateResult, type Kysely } from "kysely";
 import { AppError } from "@/errors";
 import type { InsertableStudent, Student, UpdateableStudent } from "@/types";
 
@@ -13,17 +13,18 @@ type getVerboseStudentsParams = {
   query?: string | null;
   nim?: string | null;
   groupName?: string | null;
+  withTrashed?: boolean;
 };
 
 interface StudentRepository {
   getVerboseStudent(id: number): Promise<VerboseStudent>;
-  getStudents(): Promise<Student[]>;
+  getStudents(withTrashed: boolean): Promise<Student[]>;
   getVerboseStudents(
     params: getVerboseStudentsParams
   ): Promise<VerboseStudent[]>;
   createStudent(p: InsertableStudent): Promise<Student>;
   updateStudent(id: number, input: UpdateableStudent): Promise<Student>;
-  deleteStudent(id: number): Promise<boolean>;
+  deleteStudent(id: number, soft?: boolean): Promise<boolean>;
 }
 
 class SQLiteStudentRepository implements StudentRepository {
@@ -52,6 +53,7 @@ class SQLiteStudentRepository implements StudentRepository {
         eb.fn.coalesce("s.date_of_birth", sql<string>`0`).as("date_of_birth"),
         "s.blood_type",
         "s.address",
+        "deleted_at",
 
         "g.name as group_name",
         "i.filename as image_filename",
@@ -65,8 +67,14 @@ class SQLiteStudentRepository implements StudentRepository {
     return student;
   }
 
-  async getStudents(): Promise<Student[]> {
-    const students = await this.db.selectFrom("students").selectAll().execute();
+  async getStudents(withTrashed = false): Promise<Student[]> {
+    let query = this.db.selectFrom("students").selectAll();
+
+    if (!withTrashed) {
+      query = query.where("students.deleted_at", "is", null);
+    }
+
+    const students = await query.execute();
     return students;
   }
 
@@ -74,6 +82,7 @@ class SQLiteStudentRepository implements StudentRepository {
     query: q,
     nim,
     groupName,
+    withTrashed = false,
   }: getVerboseStudentsParams): Promise<VerboseStudent[]> {
     let dbQuery = this.db
       .selectFrom("students as s")
@@ -92,11 +101,17 @@ class SQLiteStudentRepository implements StudentRepository {
         eb.fn.coalesce("s.date_of_birth", sql<string>`0`).as("date_of_birth"),
         "s.blood_type",
         "s.address",
+        "s.deleted_at",
 
         "i.filename as image_filename",
         "g.name as group_name",
       ])
       .orderBy("s.nim", "asc");
+
+    if (!withTrashed) {
+      dbQuery = dbQuery.where("deleted_at", "is", null);
+    }
+
     if (q) {
       dbQuery = dbQuery.where((eb) =>
         eb.or([
@@ -165,13 +180,23 @@ class SQLiteStudentRepository implements StudentRepository {
     return student;
   }
 
-  async deleteStudent(id: number): Promise<boolean> {
-    const result = await db
-      .deleteFrom("students")
-      .where("id", "=", id)
-      .executeTakeFirst();
+  async deleteStudent(id: number, soft = true): Promise<boolean> {
+    let query = soft
+      ? db
+          .updateTable("students")
+          .set("deleted_at", new Date().toISOString())
+          .where("id", "=", id)
+      : db.deleteFrom("students").where("id", "=", id);
+    const result = await query.executeTakeFirst();
 
-    const success = Number(result.numDeletedRows) === 0;
+    let success: boolean;
+
+    if (result instanceof UpdateResult) {
+      success = Number(result.numUpdatedRows) === 1;
+    } else {
+      success = Number(result.numDeletedRows) === 0;
+    }
+
     return success;
   }
 }

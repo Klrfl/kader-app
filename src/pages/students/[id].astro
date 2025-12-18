@@ -5,10 +5,16 @@ import { Image } from "astro:assets";
 import { actions, isInputError } from "astro:actions";
 import { newStudentRepo, newGroupRepo, newImageRepo } from "@/repositories/";
 
+const redirectTo = Astro.url.searchParams.get("redirectTo") ?? "/students";
+
 const { id } = Astro.params;
-if (!id || Number.isNaN(Number(id))) return Astro.redirect("/students");
+if (!id || Number.isNaN(Number(id))) return Astro.redirect(redirectTo);
 
 const student = await newStudentRepo().getVerboseStudent(Number(id));
+if (student.deleted_at !== null) {
+  return Astro.redirect(redirectTo);
+}
+
 const { result: image } = await newImageRepo().getImage(student.id);
 const groups = await newGroupRepo().getGroups();
 const bloodTypes = [
@@ -36,7 +42,6 @@ const studentUpdateResult = Astro.getActionResult(actions.students.update);
 const inputErrors = isInputError(studentUpdateResult?.error)
   ? studentUpdateResult.error.fields
   : {};
-const redirectTo = Astro.url.searchParams.get("redirectTo");
 
 if (studentUpdateResult) {
   if (studentUpdateResult.error) console.error(studentUpdateResult.error);

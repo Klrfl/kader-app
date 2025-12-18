@@ -98,7 +98,7 @@ export const studentDelete = defineAction({
   input: z.object({ id: z.number().positive() }),
   handler: async ({ id }) => {
     const studentRepo = newStudentRepo();
-    const success = studentRepo.deleteStudent(id);
+    const success = await studentRepo.deleteStudent(id);
 
     return { success };
   },
