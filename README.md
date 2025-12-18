@@ -32,7 +32,7 @@ first copy the .env.example file, name it .env. Set the respective variables:
 cp .env.example .env
 ```
 
-and then install dependencies with pnpm
+and then after ensuring you have Nodejs, install dependencies with pnpm
 
 ```sh
 corepack enable # or whatever installation method you prefer
@@ -45,25 +45,25 @@ to run the app, use
 pnpm dev
 ```
 
-then open http://localhost:4321.
+then open [http://localhost:4321](http://localhost:4321).
 
 ### Uploading images
+
 Before uploading, create a symbolic link from `public/images` to `/base of your app/storage/public/images` so the app can serve your photos
 
-uploading images for windows(use this command)
+to create a symbolic link on Windows, execute the following in _command prompt_:
 
 ```sh
 mklink /d C:\Users\user1\path_to\kader-app\public\images C:\Users\user1\path_to\kader-app\storage\public\images
 ```
 
-upoading images for linux(use this command)
+to create a symbolic link on Linux and Unix-like systems:
 
 ```sh
-# if you're on UNIX like systems
-# make sure to execute the following once in the root of your project
-# so you can see images in dev mode
 sudo ln -s $(pwd)/storage/public/images $(pwd)/public/images
 ```
+
+make sure to execute the command once in the root of your project.
 
 ### Build for prod
 
@@ -83,11 +83,12 @@ For a quick start, can use the `example.sqlite` database file as a base. copy it
 cp template.sqlite database.sqlite
 ```
 
-**Note**: this database was last exported in 2025-12-04. Most students have no groups and to prevent null values I put the default group as _ROC_, you'll have to update them manually
+> [!INFO]
+> this database was last exported in 2025-12-04. Most students have no groups and to prevent null values I put the default group as _ROC_, you'll have to update them manually
 
 From this point on you can use the app as normal.
 
-> [!INFO]
+> [!TIP]
 > OR if you want to start from scratch...
 > first create the database file
 >
