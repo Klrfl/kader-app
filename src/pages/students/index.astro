@@ -7,12 +7,22 @@ import { formatDate } from "@/utils/index.ts";
 const q = Astro.url.searchParams.get("q") ?? "";
 const nim = Astro.url.searchParams.get("nim") ?? "";
 const groupName = Astro.url.searchParams.get("group") ?? "";
+const showPrinted = Astro.url.searchParams.get("show_printed");
+const showBonded = Astro.url.searchParams.get("show_bonded");
 const currentUrl = Astro.url.pathname + Astro.url.search;
+
+let showBondedOnly;
+
+if (showBonded) {
+  showBondedOnly = showBonded === "bonded";
+}
 
 const students = await newStudentRepo().getVerboseStudents({
   query: q,
   nim,
   groupName,
+  showPrinted,
+  showBondedOnly,
 });
 
 const studentsCount = students.length;
@@ -63,6 +73,28 @@ const groups = await newGroupRepo().getGroups();
               </option>
             ))
           }
+        </select>
+
+        <label for="show_printed" class="label">Show which pictures</label>
+        <select name="show_printed" id="show_printed" class="select w-full">
+          <option selected={showPrinted === "printed"} value="printed">
+            Printed
+          </option>
+          <option selected={showPrinted === "not_printed"} value="not_printed">
+            Not printed
+          </option>
+          <option selected={!showPrinted} value="">Both</option>
+        </select>
+
+        <label for="show_bonded" class="label">Show bonded?</label>
+        <select name="show_bonded" id="show_bonded" class="select w-full">
+          <option selected={showBonded === "bonded"} value="bonded"
+            >Bonded with</option
+          >
+          <option selected={showBonded === "not_bonded"} value="not_bonded"
+            >Not bonded with</option
+          >
+          <option selected={!showBonded} value="">Both</option>
         </select>
 
         <label for="nim" class="label">nim (last three digits)</label>
